@@ -106,9 +106,9 @@ public class PoolableScroll : MonoBehaviour
         var contentDeltaPosition = contentPosition - previousContentPosition;
         switch (contentDeltaPosition.Value.y)
         {
-            case > 0: HandleMoveUp();
+            case > 0: HandleMoveDown();
                 break;
-            case < 0: HandleMoveDown();
+            case < 0: HandleMoveUp();
                 break;
         }
 
@@ -118,10 +118,34 @@ public class PoolableScroll : MonoBehaviour
     private void HandleMoveDown()
     {
         Debug.Log("MoveDown");
+        var firstElement = activeElements.First.Value;
+        var lastElement = activeElements.Last.Value;
     }
 
     private void HandleMoveUp()
     {
         Debug.Log("MoveUP");
+        var lastElement = activeElements.Last.Value;
+        if (!lastElement.RectTransform.IsOverlappedBy(Viewport))
+        {
+            activeElements.RemoveLast();
+            Destroy(lastElement.gameObject);
+        }
+        
+        var firstElement = activeElements.First.Value;
+        if (firstElement.RectTransform.IsOverlappedBy(Viewport))
+        {
+            var testData = new TextData(){ Text = "New Element"};
+            var firstElementPosition = firstElement.RectTransform.anchoredPosition.y;
+            var firstElementSize = firstElement.Size.y;
+            var newElementSize = GetElementSize(testData).y;
+            var newElementPosition = new Vector2(0, firstElementPosition - 
+                                                    firstElementSize / 2 - 
+                                                    newElementSize / 2);
+            
+            var newElement = CreateElement(testData, newElementPosition);
+            activeElements.AddFirst(newElement);
+        }
+        
     }
 }
