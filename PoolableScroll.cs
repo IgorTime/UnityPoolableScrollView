@@ -10,8 +10,10 @@ public class PoolableScroll : MonoBehaviour
     [SerializeField]
     private ScrollRect scrollRect;
 
-    private IEnumerable<IElementData> itemsData;
+    private readonly LinkedList<ElementView> activeElements = new();
 
+    private IEnumerable<IElementData> itemsData;
+    private Vector2? previousContentPosition;
     private RectTransform Content => scrollRect.content;
     private RectTransform Viewport => scrollRect.viewport;
 
@@ -25,6 +27,12 @@ public class PoolableScroll : MonoBehaviour
         scrollRect.onValueChanged.RemoveListener(UpdateScrollItems);
     }
 
+    private static Vector2 GetElementSize(IElementData data)
+    {
+        var prefab = Resources.Load<ElementView>(data.PrefabPath);
+        return prefab.Size;
+    }
+
     public void Initialize(IEnumerable<IElementData> itemsData)
     {
         this.itemsData = itemsData;
@@ -33,38 +41,13 @@ public class PoolableScroll : MonoBehaviour
         CreateInitialElements(itemsData);
     }
 
-    public ElementView CreateElement(IElementData data, Vector2 position)
+    private ElementView CreateElement(IElementData data, Vector2 position)
     {
         var prefab = Resources.Load<ElementView>(data.PrefabPath);
         var elementView = Instantiate(prefab, Content);
         elementView.Initialize(data);
         elementView.GetComponent<RectTransform>().anchoredPosition = position;
         return elementView;
-    }
-
-    public Vector2 GetElementSize(IElementData data)
-    {
-        var prefab = Resources.Load<ElementView>(data.PrefabPath);
-        return prefab.Size;
-    }
-
-    public bool IsVisible(Vector2 elementPosition, float elementHeightHalf)
-    {
-        var viewPortRect = Viewport.rect;
-        var elementRect = new Rect(elementPosition, new Vector2(viewPortRect.width, elementHeightHalf * 2));
-        return elementRect.Overlaps(viewPortRect);
-
-        Viewport.GetWorldCorners(viewPortWorldCorners);
-        var viewRect = scrollRect.viewport;
-        var localPosition = viewRect.localPosition;
-
-        var lowerBound = localPosition.y - viewRect.rect.height * 0.5f;
-        var upperBound = localPosition.y + viewRect.rect.height * 0.5f;
-
-        var yMax = elementPosition.y + elementHeightHalf;
-        var yMin = elementPosition.y - elementHeightHalf;
-
-        return yMin < upperBound && yMax > lowerBound;
     }
 
     private void OnValidate()
@@ -84,11 +67,9 @@ public class PoolableScroll : MonoBehaviour
             var elementPositionY = startPosition - elementHeightHalf;
 
             var elementCenterPosition = new Vector2(0, elementPositionY);
-            var elementTopPosition = new Vector2(0, elementPositionY + elementHeightHalf);
-            var elementDownPosition = new Vector2(0, elementPositionY - elementHeightHalf);
-            
             var element = CreateElement(elementData, elementCenterPosition);
             startPosition = elementPositionY - elementHeightHalf;
+            activeElements.AddFirst(element);
 
             if (!element.RectTransform.IsOverlappedBy(Viewport))
             {
@@ -114,7 +95,33 @@ public class PoolableScroll : MonoBehaviour
         return height;
     }
 
-    private void UpdateScrollItems(Vector2 arg0)
+    private void UpdateScrollItems(Vector2 contentPosition)
     {
+        if (previousContentPosition == null)
+        {
+            previousContentPosition = contentPosition;
+            return;
+        }
+
+        var contentDeltaPosition = contentPosition - previousContentPosition;
+        switch (contentDeltaPosition.Value.y)
+        {
+            case > 0: HandleMoveUp();
+                break;
+            case < 0: HandleMoveDown();
+                break;
+        }
+
+        previousContentPosition = contentPosition;
+    }
+
+    private void HandleMoveDown()
+    {
+        Debug.Log("MoveDown");
+    }
+
+    private void HandleMoveUp()
+    {
+        Debug.Log("MoveUP");
     }
 }

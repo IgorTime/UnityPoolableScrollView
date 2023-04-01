@@ -9,16 +9,36 @@ public static class RectTransformHelper
         this RectTransform target,
         RectTransform other)
     {
-        target.GetWorldCorners(targetCorners);
-        other.GetWorldCorners(otherCorners);
-
-        GetMinMax2D(targetCorners, out var targetMin, out var targetMax);
-        GetMinMax2D(otherCorners, out var otherMin, out var otherMax);
+        CalculateMinMaxOfRects(
+            target,
+            other,
+            out var targetMin,
+            out var targetMax,
+            out var otherMin,
+            out var otherMax);
 
         return otherMin.x <= targetMin.x &&
                otherMin.y <= targetMin.y &&
                otherMax.x >= targetMax.x &&
                otherMax.y >= targetMax.y;
+    }
+
+    public static bool IsPartiallyOverlappedBy(
+        this RectTransform target,
+        RectTransform other)
+    {
+        CalculateMinMaxOfRects(
+            target,
+            other,
+            out var targetMin,
+            out var targetMax,
+            out var otherMin,
+            out var otherMax);
+
+        return (targetMin.x <= otherMin.x && targetMin.x >= otherMin.x &&
+               targetMin.y <= otherMin.y && targetMin.y >= otherMin.y) ||
+               (targetMax.x <= otherMax.x && targetMax.x >= otherMax.x &&
+               targetMax.y <= otherMax.y && targetMax.y >= otherMax.y);
     }
 
     public static void GetMinMax2D(
@@ -44,5 +64,20 @@ public static class RectTransformHelper
                 max.y = Mathf.Max(max.y, corner.y);
             }
         }
+    }
+
+    private static void CalculateMinMaxOfRects(
+        RectTransform target,
+        RectTransform other,
+        out Vector2 targetMin,
+        out Vector2 targetMax,
+        out Vector2 otherMin,
+        out Vector2 otherMax)
+    {
+        target.GetWorldCorners(targetCorners);
+        other.GetWorldCorners(otherCorners);
+
+        GetMinMax2D(targetCorners, out targetMin, out targetMax);
+        GetMinMax2D(otherCorners, out otherMin, out otherMax);
     }
 }
