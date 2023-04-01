@@ -109,14 +109,23 @@ public class PoolableScroll : MonoBehaviour
 
     private void HandleMoveDown()
     {
-        Debug.Log("MoveDown");
         var firstElement = activeElements.First.Value;
+        if (!firstElement.RectTransform.IsOverlappedBy(Viewport))
+        {
+            activeElements.RemoveFirst();
+            Destroy(firstElement.gameObject);
+        }
+        
         var lastElement = activeElements.Last.Value;
+        if (lastElement.RectTransform.IsOverlappedBy(Viewport))
+        {
+            var testData = new TextData(){ Text = "New Element"};
+            CreateNewElementUp(testData);
+        }
     }
 
     private void HandleMoveUp()
     {
-        Debug.Log("MoveUP");
         var lastElement = activeElements.Last.Value;
         if (!lastElement.RectTransform.IsOverlappedBy(Viewport))
         {
@@ -128,15 +137,7 @@ public class PoolableScroll : MonoBehaviour
         if (firstElement.RectTransform.IsOverlappedBy(Viewport))
         {
             var testData = new TextData(){ Text = "New Element"};
-            var firstElementPosition = firstElement.RectTransform.anchoredPosition.y;
-            var firstElementSize = firstElement.Size.y;
-            var newElementSize = GetElementSize(testData).y;
-            var newElementPosition = new Vector2(0, firstElementPosition - 
-                                                    firstElementSize / 2 - 
-                                                    newElementSize / 2);
-            
-            var newElement = CreateElement(testData, newElementPosition);
-            activeElements.AddFirst(newElement);
+            CreateNewElementDown(testData);
         }
     }
 
@@ -169,6 +170,21 @@ public class PoolableScroll : MonoBehaviour
             
         var newElement = CreateElement(elementData, newElementPosition);
         activeElements.AddFirst(newElement);
+        return newElement;
+    }
+    
+    private ElementView CreateNewElementUp(IElementData elementData)
+    {
+        var lastElement = activeElements.Last.Value;
+        var lastElementPosition = lastElement.RectTransform.anchoredPosition.y;
+        var lastElementSize = lastElement.Size.y;
+        var newElementSize = GetElementSize(elementData).y;
+        var newElementPosition = new Vector2(0, lastElementPosition + 
+                                                lastElementSize / 2 + 
+                                                newElementSize / 2);
+            
+        var newElement = CreateElement(elementData, newElementPosition);
+        activeElements.AddLast(newElement);
         return newElement;
     }
 }
