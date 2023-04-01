@@ -12,7 +12,7 @@ public class PoolableScroll : MonoBehaviour
 
     private readonly LinkedList<ElementView> activeElements = new();
 
-    private IEnumerable<IElementData> itemsData;
+    private List<IElementData> itemsData;
     private Vector2? previousContentPosition;
     private RectTransform Content => scrollRect.content;
     private RectTransform Viewport => scrollRect.viewport;
@@ -33,7 +33,7 @@ public class PoolableScroll : MonoBehaviour
         return prefab.Size;
     }
 
-    public void Initialize(IEnumerable<IElementData> itemsData)
+    public void Initialize(List<IElementData> itemsData)
     {
         this.itemsData = itemsData;
 
@@ -41,11 +41,11 @@ public class PoolableScroll : MonoBehaviour
         CreateInitialElements(itemsData);
     }
 
-    private ElementView CreateElement(IElementData data, Vector2 position)
+    private ElementView CreateElement(IElementData data, Vector2 position, int index)
     {
         var prefab = Resources.Load<ElementView>(data.PrefabPath);
         var elementView = Instantiate(prefab, Content);
-        elementView.Initialize(data);
+        elementView.Initialize(data, index);
         elementView.GetComponent<RectTransform>().anchoredPosition = position;
         return elementView;
     }
@@ -119,8 +119,8 @@ public class PoolableScroll : MonoBehaviour
         var lastElement = activeElements.Last.Value;
         if (lastElement.RectTransform.IsOverlappedBy(Viewport))
         {
-            var testData = new TextData(){ Text = "New Element"};
-            CreateNewElementUp(testData);
+            var newElementData = itemsData[lastElement.Index - 1];
+            CreateNewElementUp(newElementData);
         }
     }
 
@@ -136,8 +136,8 @@ public class PoolableScroll : MonoBehaviour
         var firstElement = activeElements.First.Value;
         if (firstElement.RectTransform.IsOverlappedBy(Viewport))
         {
-            var testData = new TextData(){ Text = "New Element"};
-            CreateNewElementDown(testData);
+            var newElementData = itemsData[firstElement.Index + 1];
+            CreateNewElementDown(newElementData);
         }
     }
 
@@ -148,7 +148,7 @@ public class PoolableScroll : MonoBehaviour
         var elementPositionY = startPosition - elementHeightHalf;
 
         var elementCenterPosition = new Vector2(0, elementPositionY);
-        var element = CreateElement(elementData, elementCenterPosition);
+        var element = CreateElement(elementData, elementCenterPosition, 0);
         activeElements.AddFirst(element);
         return element;
     }
@@ -167,8 +167,9 @@ public class PoolableScroll : MonoBehaviour
         var newElementPosition = new Vector2(0, firstElementPosition - 
                                                 firstElementSize / 2 - 
                                                 newElementSize / 2);
-            
-        var newElement = CreateElement(elementData, newElementPosition);
+
+        var newElementIndex = firstElement.Index + 1;
+        var newElement = CreateElement(elementData, newElementPosition, newElementIndex);
         activeElements.AddFirst(newElement);
         return newElement;
     }
@@ -183,7 +184,8 @@ public class PoolableScroll : MonoBehaviour
                                                 lastElementSize / 2 + 
                                                 newElementSize / 2);
             
-        var newElement = CreateElement(elementData, newElementPosition);
+        var newElementIndex = lastElement.Index - 1;
+        var newElement = CreateElement(elementData, newElementPosition, newElementIndex);
         activeElements.AddLast(newElement);
         return newElement;
     }
