@@ -60,17 +60,9 @@ public class PoolableScroll : MonoBehaviour
 
     private void CreateInitialElements(IEnumerable<IElementData> elementsData)
     {
-        var startPosition = Content.rect.height / 2;
         foreach (var elementData in elementsData)
         {
-            var elementHeightHalf = GetElementSize(elementData).y / 2;
-            var elementPositionY = startPosition - elementHeightHalf;
-
-            var elementCenterPosition = new Vector2(0, elementPositionY);
-            var element = CreateElement(elementData, elementCenterPosition);
-            startPosition = elementPositionY - elementHeightHalf;
-            activeElements.AddFirst(element);
-
+            var element = CreateNewElementDown(elementData);
             if (!element.RectTransform.IsOverlappedBy(Viewport))
             {
                 break;
@@ -146,6 +138,37 @@ public class PoolableScroll : MonoBehaviour
             var newElement = CreateElement(testData, newElementPosition);
             activeElements.AddFirst(newElement);
         }
+    }
+
+    private ElementView CreateFirstElement(IElementData elementData)
+    {
+        var startPosition = Content.rect.height / 2;
+        var elementHeightHalf = GetElementSize(elementData).y / 2;
+        var elementPositionY = startPosition - elementHeightHalf;
+
+        var elementCenterPosition = new Vector2(0, elementPositionY);
+        var element = CreateElement(elementData, elementCenterPosition);
+        activeElements.AddFirst(element);
+        return element;
+    }
+
+    private ElementView CreateNewElementDown(IElementData elementData)
+    {
+        if (activeElements.First == null)
+        {
+            return CreateFirstElement(elementData);
+        }
         
+        var firstElement = activeElements.First.Value;
+        var firstElementPosition = firstElement.RectTransform.anchoredPosition.y;
+        var firstElementSize = firstElement.Size.y;
+        var newElementSize = GetElementSize(elementData).y;
+        var newElementPosition = new Vector2(0, firstElementPosition - 
+                                                firstElementSize / 2 - 
+                                                newElementSize / 2);
+            
+        var newElement = CreateElement(elementData, newElementPosition);
+        activeElements.AddFirst(newElement);
+        return newElement;
     }
 }
