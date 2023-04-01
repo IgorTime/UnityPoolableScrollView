@@ -10,9 +10,9 @@ public class ScrollElementsPool
     public ScrollElementsPool(string prefabPath, Transform scrollRoot)
     {
         internalPool = new ObjectPool<ElementView>(
-            CreateFunc,
-            GetFunc,
-            ReleaseFunc);
+            CreateElement,
+            GetElement,
+            ReleaseElement);
 
         prefab = Resources.Load<ElementView>(prefabPath);
         CreatePoolRoot(prefabPath, scrollRoot);
@@ -32,18 +32,18 @@ public class ScrollElementsPool
         internalPool.Release(element);
     }
 
-    private void ReleaseFunc(ElementView elementView)
+    private void ReleaseElement(ElementView elementView)
     {
         elementView.gameObject.SetActive(false);
         elementView.transform.SetParent(poolRoot);
     }
 
-    private void GetFunc(ElementView elementView)
+    private void GetElement(ElementView elementView)
     {
         elementView.gameObject.SetActive(true);
     }
 
-    private ElementView CreateFunc() => Object.Instantiate(prefab, poolRoot);
+    private ElementView CreateElement() => Object.Instantiate(prefab, poolRoot);
 
     private void CreatePoolRoot(string prefabPath, Transform scrollRoot)
     {
