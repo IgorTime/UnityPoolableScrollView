@@ -4,7 +4,9 @@ public abstract class ElementView : MonoBehaviour
 {
     [SerializeField]
     private int index;
+
     public RectTransform RectTransform => (RectTransform) transform;
+    public Vector2 Size => RectTransform.rect.size;
     public IElementData Data { get; private set; }
 
     public int Index
@@ -12,15 +14,13 @@ public abstract class ElementView : MonoBehaviour
         get => index;
         private set => index = value;
     }
-    
-    public abstract Vector2 Size { get; }
 
     public void Initialize(IElementData data, int index)
     {
         Index = index;
         Data = data;
-        SetData(data);
+        UpdateContent(data);
     }
 
-    protected abstract void SetData(IElementData data);
+    protected abstract void UpdateContent(IElementData data);
 }
