@@ -5,8 +5,6 @@ using UnityEngine.UI;
 [RequireComponent(typeof(ScrollRect))]
 public class PoolableScroll : MonoBehaviour
 {
-    private static readonly Vector3[] viewPortWorldCorners = new Vector3[4];
-
     [SerializeField]
     private ScrollRect scrollRect;
 
@@ -109,35 +107,45 @@ public class PoolableScroll : MonoBehaviour
 
     private void HandleMoveDown()
     {
+        var lastElement = activeElements.Last.Value;
+        if (lastElement.Index == 0)
+        {
+            return;
+        }
+        
+        if (lastElement.RectTransform.IsOverlappedBy(Viewport))
+        {
+            var newElementData = itemsData[lastElement.Index - 1];
+            CreateNewElementUp(newElementData);
+        }
+
         var firstElement = activeElements.First.Value;
         if (!firstElement.RectTransform.IsOverlappedBy(Viewport))
         {
             activeElements.RemoveFirst();
             Destroy(firstElement.gameObject);
         }
-        
-        var lastElement = activeElements.Last.Value;
-        if (lastElement.RectTransform.IsOverlappedBy(Viewport))
-        {
-            var newElementData = itemsData[lastElement.Index - 1];
-            CreateNewElementUp(newElementData);
-        }
     }
 
     private void HandleMoveUp()
     {
+        var firstElement = activeElements.First.Value;
+        if (firstElement.Index == itemsData.Count - 1)
+        {
+            return;
+        }
+        
+        if (firstElement.RectTransform.IsOverlappedBy(Viewport))
+        {
+            var newElementData = itemsData[firstElement.Index + 1];
+            CreateNewElementDown(newElementData);
+        }
+        
         var lastElement = activeElements.Last.Value;
         if (!lastElement.RectTransform.IsOverlappedBy(Viewport))
         {
             activeElements.RemoveLast();
             Destroy(lastElement.gameObject);
-        }
-        
-        var firstElement = activeElements.First.Value;
-        if (firstElement.RectTransform.IsOverlappedBy(Viewport))
-        {
-            var newElementData = itemsData[firstElement.Index + 1];
-            CreateNewElementDown(newElementData);
         }
     }
 
