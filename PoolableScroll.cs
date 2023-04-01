@@ -4,54 +4,12 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(ScrollRect))]
-public class Scroll : MonoBehaviour
+public class PoolableScroll : MonoBehaviour
 {
     [SerializeField]
     private ScrollRect scrollRect;
 
     private IEnumerable<IElementData> itemsData;
-
-    public void Start()
-    {
-        var data = new IElementData[]
-        {
-            new TextData {Text = "Zalupa1"}, // 100
-            new TextData {Text = "Zalupa2"}, // 100
-            new SpriteData {Sprite = null}, // 200
-            new SpriteData {Sprite = null}, // 200
-            new SpriteData {Sprite = null}, // 200
-            new SpriteData {Sprite = null}, // 200
-            new SpriteData {Sprite = null}, // 200
-            new SpriteData {Sprite = null}, // 200
-            new SpriteData {Sprite = null}, // 200
-            new SpriteData {Sprite = null}, // 200
-            new SpriteData {Sprite = null}, // 200
-            new SpriteData {Sprite = null}, // 200
-            new TextData {Text = "Zalupa3"}, //
-            new TextData {Text = "Zalupa4"},
-            new TextData {Text = "Zalupa4"},
-            new TextData {Text = "Zalupa4"},
-            new TextData {Text = "Zalupa4"},
-            new TextData {Text = "Zalupa4"},
-            new TextData {Text = "Zalupa4"},
-            new TextData {Text = "Zalupa4"},
-            new TextData {Text = "Zalupa4"},
-            new TextData {Text = "Zalupa4"},
-            new SpriteData {Sprite = null},
-            new SpriteData {Sprite = null},
-            new SpriteData {Sprite = null},
-            new SpriteData {Sprite = null},
-            new SpriteData {Sprite = null},
-            new SpriteData {Sprite = null},
-            new SpriteData {Sprite = null},
-            new SpriteData {Sprite = null},
-            new SpriteData {Sprite = null},
-            new SpriteData {Sprite = null},
-            new SpriteData {Sprite = null},
-        };
-
-        Initialize(data);
-    }
 
     private void OnEnable()
     {
