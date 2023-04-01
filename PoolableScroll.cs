@@ -63,11 +63,14 @@ public class PoolableScroll : MonoBehaviour
             var elementTopPosition = new Vector2(0, elementPositionY + elementHeightHalf);
             var elementDownPosition = new Vector2(0, elementPositionY - elementHeightHalf);
 
-            if (IsVisible(elementCenterPosition, elementHeightHalf))
-            {
-                var element = CreateElement(elementData, elementCenterPosition);
-                startPosition = elementPositionY - elementHeightHalf;
-            }
+            var element = CreateElement(elementData, elementCenterPosition);
+            startPosition = elementPositionY - elementHeightHalf;
+            
+            // if (IsVisible(elementCenterPosition, elementHeightHalf))
+            // {
+            //     var element = CreateElement(elementData, elementCenterPosition);
+            //     startPosition = elementPositionY - elementHeightHalf;
+            // }
         }
     }
 
