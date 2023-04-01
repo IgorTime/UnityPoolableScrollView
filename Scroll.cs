@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(ScrollRect))]
 public class Scroll : MonoBehaviour
 {
     [SerializeField]
@@ -84,6 +86,14 @@ public class Scroll : MonoBehaviour
         return prefab.Size;
     }
 
+    private void OnValidate()
+    {
+        if (!scrollRect)
+        {
+            scrollRect = GetComponent<ScrollRect>();
+        }
+    }
+
     private void CreateInitialElements(IEnumerable<IElementData> elementDatas)
     {
         var startPosition = scrollRect.content.rect.height / 2;
@@ -94,7 +104,7 @@ public class Scroll : MonoBehaviour
             var elementCenterPosition = new Vector2(0, elementPositionY);
             var elementTopPosition = new Vector2(0, elementPositionY + elementHeightHalf);
             var elementDownPosition = new Vector2(0, elementPositionY - elementHeightHalf);
-            
+
             if (IsVisible(elementCenterPosition, elementHeightHalf))
             {
                 var element = CreateElement(elementData, elementCenterPosition);
@@ -103,10 +113,8 @@ public class Scroll : MonoBehaviour
         }
     }
 
-    private bool IsVisible(Vector2 elementCenterPosition, float elementHeightHalf)
-    {
-        throw new System.NotImplementedException();
-    }
+    private bool IsVisible(Vector2 elementCenterPosition, float elementHeightHalf) =>
+        throw new NotImplementedException();
 
     private void SetContentSize(IEnumerable<IElementData> itemsData)
     {
