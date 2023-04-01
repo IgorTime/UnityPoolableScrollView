@@ -61,7 +61,7 @@ public class PoolableScroll : MonoBehaviour
         foreach (var elementData in elementsData)
         {
             var element = CreateNewElementDown(elementData);
-            if (!element.RectTransform.IsOverlappedBy(Viewport))
+            if (!element.RectTransform.IsPartiallyOverlappedBy(Viewport))
             {
                 break;
             }
@@ -113,14 +113,14 @@ public class PoolableScroll : MonoBehaviour
             return;
         }
         
-        if (lastElement.RectTransform.IsOverlappedBy(Viewport))
+        if (lastElement.RectTransform.IsPartiallyOverlappedBy(Viewport))
         {
             var newElementData = itemsData[lastElement.Index - 1];
             CreateNewElementUp(newElementData);
         }
 
         var firstElement = activeElements.First.Value;
-        if (!firstElement.RectTransform.IsOverlappedBy(Viewport))
+        if (!firstElement.RectTransform.IsPartiallyOverlappedBy(Viewport))
         {
             activeElements.RemoveFirst();
             Destroy(firstElement.gameObject);
@@ -135,14 +135,14 @@ public class PoolableScroll : MonoBehaviour
             return;
         }
         
-        if (firstElement.RectTransform.IsOverlappedBy(Viewport))
+        if (firstElement.RectTransform.IsPartiallyOverlappedBy(Viewport))
         {
             var newElementData = itemsData[firstElement.Index + 1];
             CreateNewElementDown(newElementData);
         }
         
         var lastElement = activeElements.Last.Value;
-        if (!lastElement.RectTransform.IsOverlappedBy(Viewport))
+        if (!lastElement.RectTransform.IsPartiallyOverlappedBy(Viewport))
         {
             activeElements.RemoveLast();
             Destroy(lastElement.gameObject);

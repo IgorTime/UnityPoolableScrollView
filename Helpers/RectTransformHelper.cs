@@ -27,18 +27,22 @@ public static class RectTransformHelper
         this RectTransform target,
         RectTransform other)
     {
-        CalculateMinMaxOfRects(
-            target,
-            other,
-            out var targetMin,
-            out var targetMax,
-            out var otherMin,
-            out var otherMax);
+        target.GetWorldCorners(targetCorners);
+        other.GetWorldCorners(otherCorners);
+        
+        GetMinMax2D(otherCorners, out var min, out var max);
+        return IsPointInside(targetCorners[0], min, max) ||
+               IsPointInside(targetCorners[1], min, max) ||
+               IsPointInside(targetCorners[2], min, max) ||
+               IsPointInside(targetCorners[3], min, max);
+    }
 
-        return (targetMin.x <= otherMin.x && targetMin.x >= otherMin.x &&
-               targetMin.y <= otherMin.y && targetMin.y >= otherMin.y) ||
-               (targetMax.x <= otherMax.x && targetMax.x >= otherMax.x &&
-               targetMax.y <= otherMax.y && targetMax.y >= otherMax.y);
+    private static bool IsPointInside(Vector2 p, in Vector2 min, in Vector2 max)
+    {
+        return p.x >= min.x &&
+               p.y >= min.y &&
+               p.x <= max.x &&
+               p.y <= max.y;
     }
 
     public static void GetMinMax2D(
