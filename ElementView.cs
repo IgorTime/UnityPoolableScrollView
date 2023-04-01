@@ -5,6 +5,7 @@ public abstract class ElementView : MonoBehaviour
     [SerializeField]
     private int index;
     public RectTransform RectTransform => (RectTransform) transform;
+    public IElementData Data { get; private set; }
 
     public int Index
     {
@@ -17,6 +18,7 @@ public abstract class ElementView : MonoBehaviour
     public void Initialize(IElementData data, int index)
     {
         Index = index;
+        Data = data;
         SetData(data);
     }
 
