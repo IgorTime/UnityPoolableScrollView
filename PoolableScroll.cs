@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,10 +5,15 @@ using UnityEngine.UI;
 [RequireComponent(typeof(ScrollRect))]
 public class PoolableScroll : MonoBehaviour
 {
+    private static readonly Vector3[] viewPortWorldCorners = new Vector3[4];
+
     [SerializeField]
     private ScrollRect scrollRect;
 
     private IEnumerable<IElementData> itemsData;
+
+    private RectTransform Content => scrollRect.content;
+    private RectTransform Viewport => scrollRect.viewport;
 
     private void OnEnable()
     {
@@ -32,7 +36,7 @@ public class PoolableScroll : MonoBehaviour
     public ElementView CreateElement(IElementData data, Vector2 position)
     {
         var prefab = Resources.Load<ElementView>(data.PrefabPath);
-        var elementView = Instantiate(prefab, scrollRect.content);
+        var elementView = Instantiate(prefab, Content);
         elementView.Initialize(data);
         elementView.GetComponent<RectTransform>().anchoredPosition = position;
         return elementView;
@@ -44,6 +48,25 @@ public class PoolableScroll : MonoBehaviour
         return prefab.Size;
     }
 
+    public bool IsVisible(Vector2 elementPosition, float elementHeightHalf)
+    {
+        var viewPortRect = Viewport.rect;
+        var elementRect = new Rect(elementPosition, new Vector2(viewPortRect.width, elementHeightHalf * 2));
+        return elementRect.Overlaps(viewPortRect);
+
+        Viewport.GetWorldCorners(viewPortWorldCorners);
+        var viewRect = scrollRect.viewport;
+        var localPosition = viewRect.localPosition;
+
+        var lowerBound = localPosition.y - viewRect.rect.height * 0.5f;
+        var upperBound = localPosition.y + viewRect.rect.height * 0.5f;
+
+        var yMax = elementPosition.y + elementHeightHalf;
+        var yMin = elementPosition.y - elementHeightHalf;
+
+        return yMin < upperBound && yMax > lowerBound;
+    }
+
     private void OnValidate()
     {
         if (!scrollRect)
@@ -52,41 +75,38 @@ public class PoolableScroll : MonoBehaviour
         }
     }
 
-    private void CreateInitialElements(IEnumerable<IElementData> elementDatas)
+    private void CreateInitialElements(IEnumerable<IElementData> elementsData)
     {
-        var startPosition = scrollRect.content.rect.height / 2;
-        foreach (var elementData in elementDatas)
+        var startPosition = Content.rect.height / 2;
+        foreach (var elementData in elementsData)
         {
             var elementHeightHalf = GetElementSize(elementData).y / 2;
             var elementPositionY = startPosition - elementHeightHalf;
+
             var elementCenterPosition = new Vector2(0, elementPositionY);
             var elementTopPosition = new Vector2(0, elementPositionY + elementHeightHalf);
             var elementDownPosition = new Vector2(0, elementPositionY - elementHeightHalf);
-
+            
             var element = CreateElement(elementData, elementCenterPosition);
             startPosition = elementPositionY - elementHeightHalf;
-            
-            // if (IsVisible(elementCenterPosition, elementHeightHalf))
-            // {
-            //     var element = CreateElement(elementData, elementCenterPosition);
-            //     startPosition = elementPositionY - elementHeightHalf;
-            // }
+
+            if (!element.RectTransform.IsOverlappedBy(Viewport))
+            {
+                break;
+            }
         }
     }
-
-    private bool IsVisible(Vector2 elementCenterPosition, float elementHeightHalf) =>
-        throw new NotImplementedException();
 
     private void SetContentSize(IEnumerable<IElementData> itemsData)
     {
         var height = CalculateFullContentHeight(itemsData);
-        scrollRect.content.sizeDelta = new Vector2(scrollRect.content.sizeDelta.x, height);
+        Content.sizeDelta = new Vector2(Content.sizeDelta.x, height);
     }
 
-    private float CalculateFullContentHeight(IEnumerable<IElementData> elementDatas)
+    private float CalculateFullContentHeight(IEnumerable<IElementData> elementsData)
     {
         var height = 0f;
-        foreach (var elementData in elementDatas)
+        foreach (var elementData in elementsData)
         {
             height += GetElementSize(elementData).y;
         }
