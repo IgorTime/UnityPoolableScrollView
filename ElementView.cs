@@ -5,15 +5,15 @@ public abstract class ElementView : MonoBehaviour
     [SerializeField]
     private int index;
 
-    public RectTransform RectTransform => (RectTransform) transform;
-    public Vector2 Size => RectTransform.rect.size;
-    public IElementData Data { get; private set; }
-
     public int Index
     {
         get => index;
         private set => index = value;
     }
+
+    public IElementData Data { get; private set; }
+    public RectTransform RectTransform => (RectTransform) transform;
+    public Vector2 Size => RectTransform.rect.size;
 
     public void Initialize(IElementData data, int index)
     {
