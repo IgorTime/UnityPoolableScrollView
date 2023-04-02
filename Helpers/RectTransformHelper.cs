@@ -2,59 +2,36 @@
 
 public static class RectTransformHelper
 {
-    private static readonly Vector3[] targetCorners = new Vector3 [4];
-    private static readonly Vector3[] otherCorners = new Vector3 [4];
+    private static readonly Vector3[] cornersBuffer = new Vector3 [4];
 
-    public static bool IsOverlappedBy(
+    public static bool IsPartiallyOverlappedBy(
         this RectTransform target,
-        RectTransform other)
+        RectTransform other,
+        out Rect rectA,
+        out Rect rectB)
     {
-        CalculateMinMaxOfRects(
-            target,
-            other,
-            out var targetMin,
-            out var targetMax,
-            out var otherMin,
-            out var otherMax);
-
-        return otherMin.x <= targetMin.x &&
-               otherMin.y <= targetMin.y &&
-               otherMax.x >= targetMax.x &&
-               otherMax.y >= targetMax.y;
+        rectA = target.GetWorldRect();
+        rectB = other.GetWorldRect();
+        target.GetWorldCorners(cornersBuffer);
+        return rectB.Contains(cornersBuffer[0]) ||
+               rectB.Contains(cornersBuffer[1]) ||
+               rectB.Contains(cornersBuffer[2]) ||
+               rectB.Contains(cornersBuffer[3]);
     }
 
     public static bool IsPartiallyOverlappedBy(
         this RectTransform target,
-        RectTransform other)
-    {
-        target.GetWorldCorners(targetCorners);
-        other.GetWorldCorners(otherCorners);
-        
-        GetMinMax2D(otherCorners, out var min, out var max);
-        return IsPointInside(targetCorners[0], min, max) ||
-               IsPointInside(targetCorners[1], min, max) ||
-               IsPointInside(targetCorners[2], min, max) ||
-               IsPointInside(targetCorners[3], min, max);
-    }
+        RectTransform other) =>
+        target.IsPartiallyOverlappedBy(other, out _, out _);
 
-    private static bool IsPointInside(Vector2 p, in Vector2 min, in Vector2 max)
+    public static Rect CreateRect(
+        Vector3[] corners)
     {
-        return p.x >= min.x &&
-               p.y >= min.y &&
-               p.x <= max.x &&
-               p.y <= max.y;
-    }
-
-    public static void GetMinMax2D(
-        Vector3[] points,
-        out Vector2 min,
-        out Vector2 max)
-    {
-        min = new Vector2();
-        max = new Vector2();
-        for (var i = 0; i < points.Length; i++)
+        var min = new Vector2();
+        var max = new Vector2();
+        for (var i = 0; i < corners.Length; i++)
         {
-            var corner = points[i];
+            var corner = corners[i];
             if (i == 0)
             {
                 min = corner;
@@ -68,20 +45,14 @@ public static class RectTransformHelper
                 max.y = Mathf.Max(max.y, corner.y);
             }
         }
+
+        var size = max - min;
+        return new Rect(min, size);
     }
 
-    private static void CalculateMinMaxOfRects(
-        RectTransform target,
-        RectTransform other,
-        out Vector2 targetMin,
-        out Vector2 targetMax,
-        out Vector2 otherMin,
-        out Vector2 otherMax)
+    public static Rect GetWorldRect(this RectTransform rectTransform)
     {
-        target.GetWorldCorners(targetCorners);
-        other.GetWorldCorners(otherCorners);
-
-        GetMinMax2D(targetCorners, out targetMin, out targetMax);
-        GetMinMax2D(otherCorners, out otherMin, out otherMax);
+        rectTransform.GetWorldCorners(cornersBuffer);
+        return CreateRect(cornersBuffer);
     }
 }
