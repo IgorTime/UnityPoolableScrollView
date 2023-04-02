@@ -129,10 +129,7 @@ public class PoolableScroll : MonoBehaviour
         }
     }
 
-    private bool IsScrollEmpty()
-    {
-        return activeElements.Count == 0 || itemsData.Count == 0;
-    }
+    private bool IsScrollEmpty() => activeElements.Count == 0 || itemsData.Count == 0;
 
     private Vector2 GetContentDeltaPosition(Vector2 contentPosition)
     {
@@ -148,20 +145,13 @@ public class PoolableScroll : MonoBehaviour
         {
             return;
         }
-        
+
         while (TryCreateNewTrailItem())
         {
         }
-        
-        while (First.RectTransform.IsBelowOf(Viewport))
+
+        while (TryRemoveHeadItem())
         {
-            ReleaseElement(First);
-            activeElements.RemoveFirst();
-            
-            if (activeElements.Count <= 1)
-            {
-                break;
-            }
         }
     }
 
@@ -171,39 +161,38 @@ public class PoolableScroll : MonoBehaviour
         {
             return;
         }
-        
+
         while (TryCreateNewHeadItem())
         {
         }
 
         while (TryRemoveTrailItem())
         {
-            
         }
-        while (Last.RectTransform.IsAboveOf(Viewport))
-        {
-            ReleaseElement(Last);
-            activeElements.RemoveLast();
+    }
 
-            if (activeElements.Count <= 1)
-            {
-                break;
-            }
+    private bool TryRemoveHeadItem()
+    {
+        if (!First.RectTransform.IsBelowOf(Viewport))
+        {
+            return false;
         }
+
+        ReleaseElement(First);
+        activeElements.RemoveFirst();
+        return true;
     }
 
     private bool TryRemoveTrailItem()
     {
-        if (Last.RectTransform.IsAboveOf(Viewport))
+        if (!Last.RectTransform.IsAboveOf(Viewport))
         {
-            ReleaseElement(Last);
-            activeElements.RemoveLast();
-
-            if (activeElements.Count <= 1)
-            {
-                break;
-            }
+            return false;
         }
+
+        ReleaseElement(Last);
+        activeElements.RemoveLast();
+        return true;
     }
 
     private bool TryCreateNewTrailItem()
