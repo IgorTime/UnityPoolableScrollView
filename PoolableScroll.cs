@@ -51,6 +51,7 @@ public class PoolableScroll : MonoBehaviour
 
     private ElementView CreateElement(IElementData data, Vector2 position, int index)
     {
+        Debug.Log("CREATE");
         var elementView = GetElementView(data);
         elementView.Initialize(data, index);
         elementView.GetComponent<RectTransform>().anchoredPosition = position;
@@ -146,11 +147,8 @@ public class PoolableScroll : MonoBehaviour
             return;
         }
 
-        while (TryCreateNewTrailItem())
-        {
-        }
-
-        while (TryRemoveHeadItem())
+        while (TryCreateNewTrailItem() ||
+               TryRemoveHeadItem())
         {
         }
     }
@@ -162,11 +160,8 @@ public class PoolableScroll : MonoBehaviour
             return;
         }
 
-        while (TryCreateNewHeadItem())
-        {
-        }
-
-        while (TryRemoveTrailItem())
+        while (TryCreateNewHeadItem() ||
+               TryRemoveTrailItem())
         {
         }
     }
@@ -219,6 +214,7 @@ public class PoolableScroll : MonoBehaviour
 
     private void ReleaseElement(ElementView element)
     {
+        Debug.Log("RELEASE");
         var pool = GetElementPool(element.Data.PrefabPath);
         pool.Release(element);
     }
