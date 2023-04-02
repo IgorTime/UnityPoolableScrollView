@@ -112,11 +112,11 @@ public class PoolableScroll : MonoBehaviour
 
     private void UpdateScrollItems(Vector2 contentPosition)
     {
-        if (activeElements.Count == 0)
+        if (IsScrollEmpty())
         {
             return;
         }
-        
+
         var contentDeltaPosition = GetContentDeltaPosition(contentPosition);
         switch (contentDeltaPosition.y)
         {
@@ -129,6 +129,11 @@ public class PoolableScroll : MonoBehaviour
         }
     }
 
+    private bool IsScrollEmpty()
+    {
+        return activeElements.Count == 0 || itemsData.Count == 0;
+    }
+
     private Vector2 GetContentDeltaPosition(Vector2 contentPosition)
     {
         previousContentPosition ??= contentPosition;
@@ -139,27 +144,32 @@ public class PoolableScroll : MonoBehaviour
 
     private void HandleMoveDown()
     {
-        if (Last.Index == 0)
+        if (IsScrolledToTheStart())
         {
             return;
         }
-
-        while (Last.RectTransform.IsPartiallyOverlappedBy(Viewport, out var rectA, out var rectB) ||
-               rectA.center.y < rectB.center.y)
+        
+        while (TryCreateNewTrailItem())
         {
-            if (Last.Index == 0)
-            {
-                return;
-            }
-            
-            CreateNewLastElement();
         }
         
+
         while (!First.RectTransform.IsPartiallyOverlappedBy(Viewport))
         {
             ReleaseElement(First);
             activeElements.RemoveFirst();
         }
+    }
+
+    private bool TryCreateNewTrailItem()
+    {
+        if (IsScrolledToTheStart() || Last.RectTransform.IsAboveOf(Viewport))
+        {
+            return false;
+        }
+
+        CreateNewTrailElement();
+        return true;
     }
 
     private void ReleaseElement(ElementView element)
@@ -170,28 +180,35 @@ public class PoolableScroll : MonoBehaviour
 
     private void HandleMoveUp()
     {
-        if (First.Index == itemsData.Count - 1)
+        if (IsScrolledToTheEnd())
         {
             return;
         }
-
-        while (First.RectTransform.IsPartiallyOverlappedBy(Viewport, out var rectA, out var rectB) ||
-               rectA.center.y > rectB.center.y)
-        {
-            if (First.Index == itemsData.Count - 1)
-            {
-                return;
-            }
-            
-            CreateNewFirstElement();
-        }
         
+        while (TryCreateNewHeadItem())
+        {
+        }
+
         while (!Last.RectTransform.IsPartiallyOverlappedBy(Viewport))
         {
             ReleaseElement(Last);
             activeElements.RemoveLast();
         }
     }
+
+    private bool TryCreateNewHeadItem()
+    {
+        if (IsScrolledToTheEnd() || First.RectTransform.IsBelowOf(Viewport))
+        {
+            return false;
+        }
+
+        CreateNewFirstElement();
+        return true;
+    }
+
+    private bool IsScrolledToTheEnd() => First.Index == itemsData.Count - 1;
+    private bool IsScrolledToTheStart() => Last.Index == 0;
 
     private ElementView CreateFirstElement()
     {
@@ -228,7 +245,7 @@ public class PoolableScroll : MonoBehaviour
         return newElement;
     }
 
-    private ElementView CreateNewLastElement()
+    private ElementView CreateNewTrailElement()
     {
         var elementData = itemsData[Last.Index - 1];
         var lastElement = activeElements.Last.Value;
