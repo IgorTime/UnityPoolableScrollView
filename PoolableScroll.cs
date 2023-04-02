@@ -153,11 +153,56 @@ public class PoolableScroll : MonoBehaviour
         {
         }
         
-
-        while (!First.RectTransform.IsPartiallyOverlappedBy(Viewport))
+        while (First.RectTransform.IsBelowOf(Viewport))
         {
             ReleaseElement(First);
             activeElements.RemoveFirst();
+            
+            if (activeElements.Count <= 1)
+            {
+                break;
+            }
+        }
+    }
+
+    private void HandleMoveUp()
+    {
+        if (IsScrolledToTheEnd())
+        {
+            return;
+        }
+        
+        while (TryCreateNewHeadItem())
+        {
+        }
+
+        while (TryRemoveTrailItem())
+        {
+            
+        }
+        while (Last.RectTransform.IsAboveOf(Viewport))
+        {
+            ReleaseElement(Last);
+            activeElements.RemoveLast();
+
+            if (activeElements.Count <= 1)
+            {
+                break;
+            }
+        }
+    }
+
+    private bool TryRemoveTrailItem()
+    {
+        if (Last.RectTransform.IsAboveOf(Viewport))
+        {
+            ReleaseElement(Last);
+            activeElements.RemoveLast();
+
+            if (activeElements.Count <= 1)
+            {
+                break;
+            }
         }
     }
 
@@ -172,30 +217,6 @@ public class PoolableScroll : MonoBehaviour
         return true;
     }
 
-    private void ReleaseElement(ElementView element)
-    {
-        var pool = GetElementPool(element.Data.PrefabPath);
-        pool.Release(element);
-    }
-
-    private void HandleMoveUp()
-    {
-        if (IsScrolledToTheEnd())
-        {
-            return;
-        }
-        
-        while (TryCreateNewHeadItem())
-        {
-        }
-
-        while (!Last.RectTransform.IsPartiallyOverlappedBy(Viewport))
-        {
-            ReleaseElement(Last);
-            activeElements.RemoveLast();
-        }
-    }
-
     private bool TryCreateNewHeadItem()
     {
         if (IsScrolledToTheEnd() || First.RectTransform.IsBelowOf(Viewport))
@@ -205,6 +226,12 @@ public class PoolableScroll : MonoBehaviour
 
         CreateNewFirstElement();
         return true;
+    }
+
+    private void ReleaseElement(ElementView element)
+    {
+        var pool = GetElementPool(element.Data.PrefabPath);
+        pool.Release(element);
     }
 
     private bool IsScrolledToTheEnd() => First.Index == itemsData.Count - 1;
