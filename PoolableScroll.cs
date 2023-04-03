@@ -35,6 +35,7 @@ public class PoolableScroll : MonoBehaviour
 
         SetContentSize(itemsData);
         CreateInitialElements(itemsData);
+        previousContentPosition = scrollRect.normalizedPosition;
     }
 
     private Vector2 GetElementSize(IElementData data)
@@ -51,7 +52,6 @@ public class PoolableScroll : MonoBehaviour
 
     private ElementView CreateElement(IElementData data, Vector2 position, int index)
     {
-        Debug.Log("CREATE");
         var elementView = GetElementView(data);
         elementView.Initialize(data, index);
         elementView.GetComponent<RectTransform>().anchoredPosition = position;
@@ -147,7 +147,7 @@ public class PoolableScroll : MonoBehaviour
             return;
         }
 
-        while (TryCreateNewTrailItem() ||
+        while (TryCreateNewTrailItem() & 
                TryRemoveHeadItem())
         {
         }
@@ -160,7 +160,7 @@ public class PoolableScroll : MonoBehaviour
             return;
         }
 
-        while (TryCreateNewHeadItem() ||
+        while (TryCreateNewHeadItem() & 
                TryRemoveTrailItem())
         {
         }
@@ -214,7 +214,6 @@ public class PoolableScroll : MonoBehaviour
 
     private void ReleaseElement(ElementView element)
     {
-        Debug.Log("RELEASE");
         var pool = GetElementPool(element.Data.PrefabPath);
         pool.Release(element);
     }
@@ -259,6 +258,11 @@ public class PoolableScroll : MonoBehaviour
 
     private ElementView CreateNewTrailElement()
     {
+        if (activeElements.Last == null)
+        {
+            return CreateFirstElement();
+        }
+
         var elementData = itemsData[Last.Index - 1];
         var lastElement = activeElements.Last.Value;
         var lastElementPosition = lastElement.RectTransform.anchoredPosition.y;

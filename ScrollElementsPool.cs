@@ -12,7 +12,8 @@ public class ScrollElementsPool
         internalPool = new ObjectPool<ElementView>(
             CreateElement,
             GetElement,
-            ReleaseElement);
+            ReleaseElement,
+            collectionCheck: false);
 
         prefab = Resources.Load<ElementView>(prefabPath);
         CreatePoolRoot(prefabPath, scrollRoot);
