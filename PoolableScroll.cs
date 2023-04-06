@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,16 +10,24 @@ public class PoolableScroll : MonoBehaviour
     [SerializeField]
     private ScrollRect scrollRect;
 
+    [SerializeField]
+    [Range(0, 1)]
+    private float normalizedPosition = 1;
+
     private readonly LinkedList<ElementView> activeElements = new();
 
     private readonly Dictionary<string, ScrollElementsPool> elementPools = new();
 
-    private List<IElementData> itemsData;
+    private IElementData[] itemsData;
+    private ElementViewData[] viewsData;
+
     private Vector2? previousContentPosition;
     private RectTransform Content => scrollRect.content;
     private RectTransform Viewport => scrollRect.viewport;
     private ElementView First => activeElements.First.Value;
     private ElementView Last => activeElements.Last.Value;
+    private int FirstIndex {get; set;}
+    private int LastIndex {get; set;}
 
     private void OnEnable()
     {
@@ -29,10 +39,11 @@ public class PoolableScroll : MonoBehaviour
         scrollRect.onValueChanged.RemoveListener(UpdateScrollItems);
     }
 
-    public void Initialize(List<IElementData> itemsData)
+    public void Initialize(IElementData[] itemsData)
     {
         this.itemsData = itemsData;
-
+        viewsData = new ElementViewData[itemsData.Length];
+        
         SetContentSize(itemsData);
         CreateInitialElements(itemsData);
         previousContentPosition = scrollRect.normalizedPosition;
@@ -80,9 +91,12 @@ public class PoolableScroll : MonoBehaviour
         {
             scrollRect = GetComponent<ScrollRect>();
         }
+
+        var newPosition = new Vector2(scrollRect.normalizedPosition.x, normalizedPosition);
+        scrollRect.normalizedPosition = newPosition;
     }
 
-    private void CreateInitialElements(List<IElementData> elementsData)
+    private void CreateInitialElements(ICollection elementsData)
     {
         for (var i = 0; i < elementsData.Count; i++)
         {
@@ -94,21 +108,25 @@ public class PoolableScroll : MonoBehaviour
         }
     }
 
-    private void SetContentSize(IEnumerable<IElementData> itemsData)
+    private void SetContentSize(IElementData[] itemsData)
     {
-        var height = CalculateFullContentHeight(itemsData);
+        var height = CalculateFullContentHeightAndViewsData(itemsData);
         Content.sizeDelta = new Vector2(Content.sizeDelta.x, height);
     }
 
-    private float CalculateFullContentHeight(IEnumerable<IElementData> elementsData)
+    private float CalculateFullContentHeightAndViewsData(IElementData[] elementsData)
     {
-        var height = 0f;
-        foreach (var elementData in elementsData)
+        var contentHeight = 0f;
+        for (var i = 0; i < elementsData.Length; i++)
         {
-            height += GetElementSize(elementData).y;
+            var elementSize = GetElementSize(elementsData[i]);
+            var elementPosition = new float2(0, contentHeight + elementSize.y * 0.5f);
+            viewsData[i] = new ElementViewData(elementPosition, elementSize, i);
+
+            contentHeight += elementSize.y;
         }
 
-        return height;
+        return contentHeight;
     }
 
     private void UpdateScrollItems(Vector2 contentPosition)
@@ -125,12 +143,12 @@ public class PoolableScroll : MonoBehaviour
                 HandleMoveDown();
                 break;
             case < 0:
-                HandleMoveUp();
+                HandleMoveUp(contentPosition);
                 break;
         }
     }
 
-    private bool IsScrollEmpty() => activeElements.Count == 0 || itemsData.Count == 0;
+    private bool IsScrollEmpty() => activeElements.Count == 0 || itemsData.Length == 0;
 
     private Vector2 GetContentDeltaPosition(Vector2 contentPosition)
     {
@@ -147,23 +165,24 @@ public class PoolableScroll : MonoBehaviour
             return;
         }
 
-        while (TryCreateNewTrailItem() & 
+        while (TryCreateNewTrailItem() &
                TryRemoveHeadItem())
         {
         }
     }
 
-    private void HandleMoveUp()
+    private void HandleMoveUp(Vector2 contentNormalizedPosition)
     {
         if (IsScrolledToTheEnd())
         {
             return;
         }
 
-        while (TryCreateNewHeadItem() & 
-               TryRemoveTrailItem())
-        {
-        }
+        TryCreateNewHeadItem(contentNormalizedPosition);
+        // while (TryCreateNewHeadItem(contentNormalizedPosition) &
+        //        TryRemoveTrailItem())
+        // {
+        // }
     }
 
     private bool TryRemoveHeadItem()
@@ -201,14 +220,21 @@ public class PoolableScroll : MonoBehaviour
         return true;
     }
 
-    private bool TryCreateNewHeadItem()
+    private bool TryCreateNewHeadItem(Vector2 contentNormalizedPosition)
     {
-        if (IsScrolledToTheEnd() || First.RectTransform.IsBelowOf(Viewport))
-        {
-            return false;
-        }
-
-        CreateNewFirstElement();
+        var i = First.Index;
+        var min = Content.anchoredPosition.y;
+        var max = min + Viewport.rect.height;
+        var isInside = viewsData[i].Min.y > min &&
+                       viewsData[i].Max.y < max;
+        Debug.Log($"Item {i}: is inside: {isInside}");
+        
+        // if (IsScrolledToTheEnd() || First.RectTransform.IsBelowOf(Viewport))
+        // {
+        //     return false;
+        // }
+        //
+        // CreateNewFirstElement();
         return true;
     }
 
@@ -218,7 +244,7 @@ public class PoolableScroll : MonoBehaviour
         pool.Release(element);
     }
 
-    private bool IsScrolledToTheEnd() => First.Index == itemsData.Count - 1;
+    private bool IsScrolledToTheEnd() => First.Index == itemsData.Length - 1;
     private bool IsScrolledToTheStart() => Last.Index == 0;
 
     private ElementView CreateFirstElement()
