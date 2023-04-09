@@ -26,8 +26,10 @@ public class PoolableScroll : MonoBehaviour
     private RectTransform Viewport => scrollRect.viewport;
     private ElementView First => activeElements.First.Value;
     private ElementView Last => activeElements.Last.Value;
-    private int FirstIndex {get; set;}
-    private int LastIndex {get; set;}
+    private int FirstIndex { get; set; }
+    private int LastIndex { get; set; }
+    
+    private float ViewportHeight =>  Viewport.rect.height;
 
     private void OnEnable()
     {
@@ -43,7 +45,7 @@ public class PoolableScroll : MonoBehaviour
     {
         this.itemsData = itemsData;
         viewsData = new ElementViewData[itemsData.Length];
-        
+
         SetContentSize(itemsData);
         CreateInitialElements(itemsData);
         previousContentPosition = scrollRect.normalizedPosition;
@@ -121,7 +123,7 @@ public class PoolableScroll : MonoBehaviour
         {
             var elementSize = GetElementSize(elementsData[i]);
             var elementPosition = new float2(0, contentHeight + elementSize.y * 0.5f);
-            viewsData[i] = new ElementViewData(elementPosition, elementSize, i);
+            viewsData[i] = new ElementViewData(elementPosition, elementSize);
 
             contentHeight += elementSize.y;
         }
@@ -178,16 +180,15 @@ public class PoolableScroll : MonoBehaviour
             return;
         }
 
-        TryCreateNewHeadItem(contentNormalizedPosition);
-        // while (TryCreateNewHeadItem(contentNormalizedPosition) &
-        //        TryRemoveTrailItem())
-        // {
-        // }
+        while (TryCreateNewHeadItem() &
+               TryRemoveTrailItem())
+        {
+        }
     }
 
     private bool TryRemoveHeadItem()
     {
-        if (!First.RectTransform.IsBelowOf(Viewport))
+        if (!IsBelow(viewsData[First.Index]))
         {
             return false;
         }
@@ -199,7 +200,7 @@ public class PoolableScroll : MonoBehaviour
 
     private bool TryRemoveTrailItem()
     {
-        if (!Last.RectTransform.IsAboveOf(Viewport))
+        if (!IsAbove(viewsData[Last.Index]))
         {
             return false;
         }
@@ -211,7 +212,7 @@ public class PoolableScroll : MonoBehaviour
 
     private bool TryCreateNewTrailItem()
     {
-        if (IsScrolledToTheStart() || Last.RectTransform.IsAboveOf(Viewport))
+        if (IsScrolledToTheStart() || IsAbove(viewsData[Last.Index]))
         {
             return false;
         }
@@ -220,21 +221,14 @@ public class PoolableScroll : MonoBehaviour
         return true;
     }
 
-    private bool TryCreateNewHeadItem(Vector2 contentNormalizedPosition)
+    private bool TryCreateNewHeadItem()
     {
-        var i = First.Index;
-        var min = Content.anchoredPosition.y;
-        var max = min + Viewport.rect.height;
-        var isInside = viewsData[i].Min.y > min &&
-                       viewsData[i].Max.y < max;
-        Debug.Log($"Item {i}: is inside: {isInside}");
+        if (IsScrolledToTheEnd() || IsBelow(viewsData[First.Index]))
+        {
+            return false;
+        }
         
-        // if (IsScrolledToTheEnd() || First.RectTransform.IsBelowOf(Viewport))
-        // {
-        //     return false;
-        // }
-        //
-        // CreateNewFirstElement();
+        CreateNewFirstElement();
         return true;
     }
 
@@ -303,4 +297,33 @@ public class PoolableScroll : MonoBehaviour
         activeElements.AddLast(newElement);
         return newElement;
     }
+
+    
+    
+    public bool IsAbove(in ElementViewData elementViewData)
+    {
+        return elementViewData.Max.y > Content.anchoredPosition.y;    
+    }
+    
+    public bool IsBelow(in ElementViewData elementViewData)
+    {
+        return elementViewData.Min.y < Content.anchoredPosition.y + Viewport.rect.height;
+    }
+}
+
+public struct ElementViewData
+{
+    private readonly Vector2 position;
+    private readonly Vector2 size;
+
+    public ElementViewData(Vector2 position, Vector2 size)
+    {
+        this.position = position;
+        this.size = size;
+        Min = position - size * 0.5f;
+        Max = position + size * 0.5f;
+    }
+
+    public Vector2 Min { get; set; }
+    public Vector2 Max { get; set; }
 }
