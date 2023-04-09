@@ -60,9 +60,16 @@ public class PoolableScroll : MonoBehaviour
     public bool IsBelowOfViewport(in int elementIndex) =>
         viewsData[elementIndex].Min.y > Content.anchoredPosition.y + Viewport.rect.height;
 
-    public bool IsVisibleInViewport(in int elementIndex) =>
+    public bool IsPartiallyVisibleInViewport(in int elementIndex) =>
         !IsAboveOfViewport(elementIndex) &&
         !IsBelowOfViewport(elementIndex);
+
+    public bool IsFullyVisibleInViewport(in int elementIndex)
+    {
+        var anchoredPosition = Content.anchoredPosition;
+        return viewsData[elementIndex].Min.y >= anchoredPosition.y &&
+               viewsData[elementIndex].Max.y <= anchoredPosition.y + Viewport.rect.height;
+    }
 
     private Vector2 GetElementSize(IElementData data)
     {
@@ -158,7 +165,7 @@ public class PoolableScroll : MonoBehaviour
                 HandleMoveDown();
                 break;
             case < 0:
-                HandleMoveUp(contentPosition);
+                HandleMoveUp();
                 break;
         }
     }
@@ -180,20 +187,20 @@ public class PoolableScroll : MonoBehaviour
             return;
         }
 
-        while (TryCreateNewTrailItem() &
+        while (TryCreateNewTrailItem() |
                TryRemoveHeadItem())
         {
         }
     }
 
-    private void HandleMoveUp(Vector2 contentNormalizedPosition)
+    private void HandleMoveUp()
     {
         if (IsScrolledToTheEnd())
         {
             return;
         }
 
-        while (TryCreateNewHeadItem() &
+        while (TryCreateNewHeadItem() |
                TryRemoveTrailItem())
         {
         }
@@ -207,7 +214,6 @@ public class PoolableScroll : MonoBehaviour
         }
 
         ReleaseFirstElement();
-        activeElements.RemoveFirst();
         return true;
     }
 
@@ -219,7 +225,6 @@ public class PoolableScroll : MonoBehaviour
         }
 
         ReleaseLastElement();
-        activeElements.RemoveLast();
         return true;
     }
 
@@ -227,12 +232,14 @@ public class PoolableScroll : MonoBehaviour
     {
         FirstIndex--;
         ReleaseElement(First);
+        activeElements.RemoveFirst();
     }
 
     private void ReleaseLastElement()
     {
         LastIndex++;
         ReleaseElement(Last);
+        activeElements.RemoveLast();
     }
 
     private bool TryCreateNewTrailItem()
