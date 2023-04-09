@@ -22,8 +22,7 @@ public class PoolableScroll : MonoBehaviour
     private ElementViewData[] viewsData;
 
     private Vector2? previousContentPosition;
-    private RectTransform Content => scrollRect.content;
-    private RectTransform Viewport => scrollRect.viewport;
+    private RectTransform Content { get; set; }
     private ElementView First => activeElements?.First?.Value;
     private ElementView Last => activeElements?.Last?.Value;
 
@@ -32,8 +31,9 @@ public class PoolableScroll : MonoBehaviour
 
     [field: SerializeField]
     private int LastIndex { get; set; }
-
-    private float ViewportHeight => Viewport.rect.height;
+    
+    private Rect ViewportRect { get; set; }
+    private Rect ContentRect { get; set; }
 
     private void OnEnable()
     {
@@ -49,18 +49,21 @@ public class PoolableScroll : MonoBehaviour
     {
         this.itemsData = itemsData;
         viewsData = new ElementViewData[itemsData.Length];
+        Content = scrollRect.content;
+        ViewportRect = scrollRect.viewport.rect;
+        ContentRect = scrollRect.content.rect;
 
         SetContentSize(itemsData);
         CreateInitialElements(itemsData);
         previousContentPosition = scrollRect.normalizedPosition;
     }
 
-    public bool IsAboveOfViewport(in int elementIndex) => viewsData[elementIndex].Max.y < Content.anchoredPosition.y;
+    private bool IsAboveOfViewport(in int elementIndex) => viewsData[elementIndex].Max.y < Content.anchoredPosition.y;
 
-    public bool IsBelowOfViewport(in int elementIndex) =>
-        viewsData[elementIndex].Min.y > Content.anchoredPosition.y + Viewport.rect.height;
+    private bool IsBelowOfViewport(in int elementIndex) =>
+        viewsData[elementIndex].Min.y > Content.anchoredPosition.y + ViewportRect.height;
 
-    public bool IsPartiallyVisibleInViewport(in int elementIndex) =>
+    private bool IsPartiallyVisibleInViewport(in int elementIndex) =>
         !IsAboveOfViewport(elementIndex) &&
         !IsBelowOfViewport(elementIndex);
 
@@ -68,7 +71,7 @@ public class PoolableScroll : MonoBehaviour
     {
         var anchoredPosition = Content.anchoredPosition;
         return viewsData[elementIndex].Min.y >= anchoredPosition.y &&
-               viewsData[elementIndex].Max.y <= anchoredPosition.y + Viewport.rect.height;
+               viewsData[elementIndex].Max.y <= anchoredPosition.y + ViewportRect.height;
     }
 
     private Vector2 GetElementSize(IElementData data)
