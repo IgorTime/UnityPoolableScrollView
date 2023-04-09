@@ -302,12 +302,12 @@ public class PoolableScroll : MonoBehaviour
     
     public bool IsAbove(in ElementViewData elementViewData)
     {
-        return elementViewData.Max.y > Content.anchoredPosition.y;    
+        return elementViewData.Max.y < Content.anchoredPosition.y;    
     }
     
     public bool IsBelow(in ElementViewData elementViewData)
     {
-        return elementViewData.Min.y < Content.anchoredPosition.y + Viewport.rect.height;
+        return elementViewData.Min.y > Content.anchoredPosition.y + Viewport.rect.height;
     }
 }
 
