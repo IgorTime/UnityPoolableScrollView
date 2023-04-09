@@ -26,10 +26,14 @@ public class PoolableScroll : MonoBehaviour
     private RectTransform Viewport => scrollRect.viewport;
     private ElementView First => activeElements.First.Value;
     private ElementView Last => activeElements.Last.Value;
+
+    [field: SerializeField]
     private int FirstIndex { get; set; }
+
+    [field: SerializeField]
     private int LastIndex { get; set; }
-    
-    private float ViewportHeight =>  Viewport.rect.height;
+
+    private float ViewportHeight => Viewport.rect.height;
 
     private void OnEnable()
     {
@@ -50,6 +54,12 @@ public class PoolableScroll : MonoBehaviour
         CreateInitialElements(itemsData);
         previousContentPosition = scrollRect.normalizedPosition;
     }
+
+    public bool IsAboveOfViewport(in ElementViewData elementViewData) =>
+        elementViewData.Max.y < Content.anchoredPosition.y;
+
+    public bool IsBelowOfViewport(in ElementViewData elementViewData) =>
+        elementViewData.Min.y > Content.anchoredPosition.y + Viewport.rect.height;
 
     private Vector2 GetElementSize(IElementData data)
     {
@@ -188,31 +198,43 @@ public class PoolableScroll : MonoBehaviour
 
     private bool TryRemoveHeadItem()
     {
-        if (!IsBelow(viewsData[First.Index]))
+        if (!IsBelowOfViewport(viewsData[FirstIndex]))
         {
             return false;
         }
-
-        ReleaseElement(First);
+        
+        ReleaseFirstElement();
         activeElements.RemoveFirst();
         return true;
     }
 
     private bool TryRemoveTrailItem()
     {
-        if (!IsAbove(viewsData[Last.Index]))
+        if (!IsAboveOfViewport(viewsData[LastIndex]))
         {
             return false;
         }
 
-        ReleaseElement(Last);
+        ReleaseLastElement();
         activeElements.RemoveLast();
         return true;
     }
 
+    private void ReleaseFirstElement()
+    {
+        FirstIndex--;
+        ReleaseElement(First);
+    }
+
+    private void ReleaseLastElement()
+    {
+        LastIndex++;
+        ReleaseElement(Last);
+    }
+
     private bool TryCreateNewTrailItem()
     {
-        if (IsScrolledToTheStart() || IsAbove(viewsData[Last.Index]))
+        if (IsScrolledToTheStart() || IsAboveOfViewport(viewsData[LastIndex]))
         {
             return false;
         }
@@ -223,11 +245,12 @@ public class PoolableScroll : MonoBehaviour
 
     private bool TryCreateNewHeadItem()
     {
-        if (IsScrolledToTheEnd() || IsBelow(viewsData[First.Index]))
+        if (IsScrolledToTheEnd() ||
+            IsBelowOfViewport(viewsData[FirstIndex]))
         {
             return false;
         }
-        
+
         CreateNewFirstElement();
         return true;
     }
@@ -238,10 +261,10 @@ public class PoolableScroll : MonoBehaviour
         pool.Release(element);
     }
 
-    private bool IsScrolledToTheEnd() => First.Index == itemsData.Length - 1;
-    private bool IsScrolledToTheStart() => Last.Index == 0;
+    private bool IsScrolledToTheEnd() => FirstIndex == itemsData.Length - 1;
+    private bool IsScrolledToTheStart() => LastIndex == 0;
 
-    private ElementView CreateFirstElement()
+    private ElementView CreateVeryFirstElement()
     {
         var elementData = itemsData[0];
         var startPosition = Content.rect.height / 2;
@@ -258,10 +281,11 @@ public class PoolableScroll : MonoBehaviour
     {
         if (activeElements.First == null)
         {
-            return CreateFirstElement();
+            return CreateVeryFirstElement();
         }
 
-        var elementData = itemsData[First.Index + 1];
+        FirstIndex++;
+        var elementData = itemsData[FirstIndex];
         var firstElement = activeElements.First.Value;
         var firstElementPosition = firstElement.RectTransform.anchoredPosition.y;
         var firstElementSize = firstElement.Size.y;
@@ -270,8 +294,7 @@ public class PoolableScroll : MonoBehaviour
                                                 firstElementSize / 2 -
                                                 newElementSize / 2);
 
-        var newElementIndex = firstElement.Index + 1;
-        var newElement = CreateElement(elementData, newElementPosition, newElementIndex);
+        var newElement = CreateElement(elementData, newElementPosition, FirstIndex);
         activeElements.AddFirst(newElement);
         return newElement;
     }
@@ -280,10 +303,11 @@ public class PoolableScroll : MonoBehaviour
     {
         if (activeElements.Last == null)
         {
-            return CreateFirstElement();
+            return CreateVeryFirstElement();
         }
 
-        var elementData = itemsData[Last.Index - 1];
+        LastIndex--;
+        var elementData = itemsData[LastIndex];
         var lastElement = activeElements.Last.Value;
         var lastElementPosition = lastElement.RectTransform.anchoredPosition.y;
         var lastElementSize = lastElement.Size.y;
@@ -292,22 +316,9 @@ public class PoolableScroll : MonoBehaviour
                                                 lastElementSize / 2 +
                                                 newElementSize / 2);
 
-        var newElementIndex = lastElement.Index - 1;
-        var newElement = CreateElement(elementData, newElementPosition, newElementIndex);
+        var newElement = CreateElement(elementData, newElementPosition, LastIndex);
         activeElements.AddLast(newElement);
         return newElement;
-    }
-
-    
-    
-    public bool IsAbove(in ElementViewData elementViewData)
-    {
-        return elementViewData.Max.y < Content.anchoredPosition.y;    
-    }
-    
-    public bool IsBelow(in ElementViewData elementViewData)
-    {
-        return elementViewData.Min.y > Content.anchoredPosition.y + Viewport.rect.height;
     }
 }
 
