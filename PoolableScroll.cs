@@ -24,8 +24,8 @@ public class PoolableScroll : MonoBehaviour
     private Vector2? previousContentPosition;
     private RectTransform Content => scrollRect.content;
     private RectTransform Viewport => scrollRect.viewport;
-    private ElementView First => activeElements.First.Value;
-    private ElementView Last => activeElements.Last.Value;
+    private ElementView First => activeElements?.First?.Value;
+    private ElementView Last => activeElements?.Last?.Value;
 
     [field: SerializeField]
     private int FirstIndex { get; set; }
@@ -122,6 +122,12 @@ public class PoolableScroll : MonoBehaviour
     {
         for (var i = 0; i < elementsData.Count; i++)
         {
+            if (i == 0)
+            {
+                CreateVeryFirstElement();
+                continue;
+            }
+            
             CreateNewFirstElement();
             if (IsBelowOfViewport(FirstIndex))
             {
@@ -187,8 +193,12 @@ public class PoolableScroll : MonoBehaviour
             return;
         }
 
-        while (TryCreateNewTrailItem() |
-               TryRemoveHeadItem())
+        while (TryRemoveHeadItem())
+        {
+            
+        }
+        
+        while (TryCreateNewTrailItem())
         {
         }
     }
@@ -200,8 +210,11 @@ public class PoolableScroll : MonoBehaviour
             return;
         }
 
-        while (TryCreateNewHeadItem() |
-               TryRemoveTrailItem())
+        while (TryRemoveTrailItem())
+        {
+        }
+        
+        while (TryCreateNewHeadItem())
         {
         }
     }
@@ -231,15 +244,23 @@ public class PoolableScroll : MonoBehaviour
     private void ReleaseFirstElement()
     {
         FirstIndex--;
-        ReleaseElement(First);
-        activeElements.RemoveFirst();
+        
+        if(First != null)
+        {
+            ReleaseElement(First);
+            activeElements.RemoveFirst();
+        }
     }
 
     private void ReleaseLastElement()
     {
         LastIndex++;
-        ReleaseElement(Last);
-        activeElements.RemoveLast();
+
+        if (Last != null)
+        {
+            ReleaseElement(Last);
+            activeElements.RemoveLast();
+        }
     }
 
     private bool TryCreateNewTrailItem()
@@ -288,19 +309,17 @@ public class PoolableScroll : MonoBehaviour
 
     private void CreateNewFirstElement()
     {
-        if (activeElements.First == null)
-        {
-            CreateVeryFirstElement();
-            return;
-        }
-
         FirstIndex++;
-        var newElement = CreateElement(
-            itemsData[FirstIndex],
-            CalculateVerticalPositionInContent(FirstIndex),
-            FirstIndex);
+        if (IsPartiallyVisibleInViewport(FirstIndex) ||
+            IsBelowOfViewport(FirstIndex))
+        {
+            var newElement = CreateElement(
+                itemsData[FirstIndex],
+                CalculateVerticalPositionInContent(FirstIndex),
+                FirstIndex);
 
-        activeElements.AddFirst(newElement);
+            activeElements.AddFirst(newElement);
+        }
     }
 
     private Vector2 CalculateVerticalPositionInContent(int itemIndex) =>
@@ -308,19 +327,17 @@ public class PoolableScroll : MonoBehaviour
 
     private void CreateNewTrailElement()
     {
-        if (activeElements.Last == null)
-        {
-            CreateVeryFirstElement();
-            return;
-        }
-
         LastIndex--;
-        var newElement = CreateElement(
-            itemsData[LastIndex],
-            CalculateVerticalPositionInContent(LastIndex),
-            LastIndex);
+        if (IsPartiallyVisibleInViewport(LastIndex) ||
+            IsAboveOfViewport(LastIndex))
+        {
+            var newElement = CreateElement(
+                itemsData[LastIndex],
+                CalculateVerticalPositionInContent(LastIndex),
+                LastIndex);
 
-        activeElements.AddLast(newElement);
+            activeElements.AddLast(newElement);
+        }
     }
 }
 
