@@ -23,4 +23,5 @@ public abstract class ElementView : MonoBehaviour
     }
 
     protected abstract void UpdateContent(IElementData data);
+    public abstract void SetVisibility(bool isVisible);
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
@@ -55,11 +56,15 @@ public class PoolableScroll : MonoBehaviour
         previousContentPosition = scrollRect.normalizedPosition;
     }
 
-    public bool IsAboveOfViewport(in ElementViewData elementViewData) =>
-        elementViewData.Max.y < Content.anchoredPosition.y;
+    public bool IsAboveOfViewport(in int elementIndex) =>
+        viewsData[elementIndex].Max.y < Content.anchoredPosition.y;
 
-    public bool IsBelowOfViewport(in ElementViewData elementViewData) =>
-        elementViewData.Min.y > Content.anchoredPosition.y + Viewport.rect.height;
+    public bool IsBelowOfViewport(in int elementIndex) =>
+        viewsData[elementIndex].Min.y > Content.anchoredPosition.y + Viewport.rect.height;
+
+    public bool IsVisibleInViewport(in int elementIndex) =>
+        !IsAboveOfViewport(elementIndex) &&
+        !IsBelowOfViewport(elementIndex);
 
     private Vector2 GetElementSize(IElementData data)
     {
@@ -84,14 +89,14 @@ public class PoolableScroll : MonoBehaviour
     private ElementView GetElementView(IElementData data)
     {
         var pool = GetElementPool(data.PrefabPath);
-        return pool.Get(Content);
+        return pool.Get();
     }
 
     private ScrollElementsPool GetElementPool(string prefabPath)
     {
         if (!elementPools.TryGetValue(prefabPath, out var pool))
         {
-            elementPools[prefabPath] = pool = new ScrollElementsPool(prefabPath, transform);
+            elementPools[prefabPath] = pool = new ScrollElementsPool(prefabPath, Content);
         }
 
         return pool;
@@ -112,8 +117,8 @@ public class PoolableScroll : MonoBehaviour
     {
         for (var i = 0; i < elementsData.Count; i++)
         {
-            var element = CreateNewFirstElement();
-            if (!element.RectTransform.IsPartiallyOverlappedBy(Viewport))
+            CreateNewFirstElement();
+            if (IsBelowOfViewport(FirstIndex))
             {
                 break;
             }
@@ -198,11 +203,11 @@ public class PoolableScroll : MonoBehaviour
 
     private bool TryRemoveHeadItem()
     {
-        if (!IsBelowOfViewport(viewsData[FirstIndex]))
+        if (!IsBelowOfViewport(FirstIndex))
         {
             return false;
         }
-        
+
         ReleaseFirstElement();
         activeElements.RemoveFirst();
         return true;
@@ -210,7 +215,7 @@ public class PoolableScroll : MonoBehaviour
 
     private bool TryRemoveTrailItem()
     {
-        if (!IsAboveOfViewport(viewsData[LastIndex]))
+        if (!IsAboveOfViewport(LastIndex))
         {
             return false;
         }
@@ -234,7 +239,7 @@ public class PoolableScroll : MonoBehaviour
 
     private bool TryCreateNewTrailItem()
     {
-        if (IsScrolledToTheStart() || IsAboveOfViewport(viewsData[LastIndex]))
+        if (IsScrolledToTheStart() || IsAboveOfViewport(LastIndex))
         {
             return false;
         }
@@ -246,7 +251,7 @@ public class PoolableScroll : MonoBehaviour
     private bool TryCreateNewHeadItem()
     {
         if (IsScrolledToTheEnd() ||
-            IsBelowOfViewport(viewsData[FirstIndex]))
+            IsBelowOfViewport(FirstIndex))
         {
             return false;
         }
@@ -277,64 +282,65 @@ public class PoolableScroll : MonoBehaviour
         return element;
     }
 
-    private ElementView CreateNewFirstElement()
+    private void CreateNewFirstElement()
     {
         if (activeElements.First == null)
         {
-            return CreateVeryFirstElement();
+            CreateVeryFirstElement();
+            return;
         }
 
-        FirstIndex++;
-        var elementData = itemsData[FirstIndex];
-        var firstElement = activeElements.First.Value;
-        var firstElementPosition = firstElement.RectTransform.anchoredPosition.y;
-        var firstElementSize = firstElement.Size.y;
-        var newElementSize = GetElementSize(elementData).y;
-        var newElementPosition = new Vector2(0, firstElementPosition -
-                                                firstElementSize / 2 -
-                                                newElementSize / 2);
 
-        var newElement = CreateElement(elementData, newElementPosition, FirstIndex);
+        var isCurrentFirstVisible = IsVisibleInViewport(FirstIndex);
+        FirstIndex++;
+        if (!isCurrentFirstVisible)
+        {
+            return;
+        }
+        
+        var positionInsideContent = new Vector2(0, Content.rect.height * 0.5f - viewsData[FirstIndex].Position.y);
+        var newElement = CreateElement(
+            itemsData[FirstIndex], 
+            positionInsideContent, 
+            FirstIndex);
+        
         activeElements.AddFirst(newElement);
-        return newElement;
     }
 
-    private ElementView CreateNewTrailElement()
+    private void CreateNewTrailElement()
     {
         if (activeElements.Last == null)
         {
-            return CreateVeryFirstElement();
+            CreateVeryFirstElement();
+            return;
         }
-
+        
+        var isCurrentLastVisible = IsVisibleInViewport(LastIndex);
         LastIndex--;
-        var elementData = itemsData[LastIndex];
-        var lastElement = activeElements.Last.Value;
-        var lastElementPosition = lastElement.RectTransform.anchoredPosition.y;
-        var lastElementSize = lastElement.Size.y;
-        var newElementSize = GetElementSize(elementData).y;
-        var newElementPosition = new Vector2(0, lastElementPosition +
-                                                lastElementSize / 2 +
-                                                newElementSize / 2);
-
-        var newElement = CreateElement(elementData, newElementPosition, LastIndex);
+        if (!isCurrentLastVisible)
+        {
+            return;
+        }
+        
+        var positionInsideContent = new Vector2(0, Content.rect.height * 0.5f - viewsData[LastIndex].Position.y);
+        var newElement = CreateElement(
+            itemsData[LastIndex],
+            positionInsideContent, 
+            LastIndex);
         activeElements.AddLast(newElement);
-        return newElement;
     }
 }
 
-public struct ElementViewData
+public readonly struct ElementViewData
 {
-    private readonly Vector2 position;
-    private readonly Vector2 size;
+    public Vector2 Min { get; }
+    public Vector2 Max { get; }
+    public Vector2 Position { get; }
 
     public ElementViewData(Vector2 position, Vector2 size)
     {
-        this.position = position;
-        this.size = size;
+        Position = position;
         Min = position - size * 0.5f;
         Max = position + size * 0.5f;
     }
-
-    public Vector2 Min { get; set; }
-    public Vector2 Max { get; set; }
 }

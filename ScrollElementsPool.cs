@@ -3,12 +3,13 @@ using UnityEngine.Pool;
 
 public class ScrollElementsPool
 {
+    private readonly Transform parent;
     private readonly IObjectPool<ElementView> internalPool;
     private readonly ElementView prefab;
-    private Transform poolRoot;
 
-    public ScrollElementsPool(string prefabPath, Transform scrollRoot)
+    public ScrollElementsPool(string prefabPath, Transform parent)
     {
+        this.parent = parent;
         internalPool = new ObjectPool<ElementView>(
             CreateElement,
             GetElement,
@@ -16,15 +17,9 @@ public class ScrollElementsPool
             collectionCheck: false);
 
         prefab = Resources.Load<ElementView>(prefabPath);
-        CreatePoolRoot(prefabPath, scrollRoot);
     }
 
-    public ElementView Get(Transform parent)
-    {
-        var elementView = internalPool.Get();
-        elementView.transform.SetParent(parent);
-        return elementView;
-    }
+    public ElementView Get() => internalPool.Get();
 
     public ElementView Peek() => prefab;
 
@@ -33,23 +28,15 @@ public class ScrollElementsPool
         internalPool.Release(element);
     }
 
-    private void ReleaseElement(ElementView elementView)
+    private static void ReleaseElement(ElementView elementView)
     {
-        elementView.gameObject.SetActive(false);
-        elementView.transform.SetParent(poolRoot);
+        elementView.SetVisibility(false);
     }
 
-    private void GetElement(ElementView elementView)
+    private static void GetElement(ElementView elementView)
     {
-        elementView.gameObject.SetActive(true);
+        elementView.SetVisibility(true);
     }
 
-    private ElementView CreateElement() => Object.Instantiate(prefab, poolRoot);
-
-    private void CreatePoolRoot(string prefabPath, Transform scrollRoot)
-    {
-        var poolRootObject = new GameObject($"PoolRoot_{prefabPath}");
-        poolRoot = poolRootObject.transform;
-        poolRoot.SetParent(scrollRoot, false);
-    }
+    private ElementView CreateElement() => Object.Instantiate(prefab, parent);
 }
