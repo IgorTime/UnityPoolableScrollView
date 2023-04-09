@@ -26,7 +26,7 @@ public class PoolableScroll : MonoBehaviour
     private ElementViewData[] viewsData;
     private Vector2? previousContentPosition;
 
-    private Rect viewportRect;
+    private float viewportHeight;
     private Rect contentRect;
     private RectTransform content;
     private ElementView First => activeElements?.First?.Value;
@@ -47,10 +47,11 @@ public class PoolableScroll : MonoBehaviour
         this.itemsData = itemsData;
         viewsData = new ElementViewData[itemsData.Length];
         content = scrollRect.content;
-        viewportRect = scrollRect.viewport.rect;
-        contentRect = scrollRect.content.rect;
-
         SetContentSize(itemsData);
+        
+        contentRect = scrollRect.content.rect;
+        viewportHeight = scrollRect.viewport.rect.height;
+
         CreateInitialElements(itemsData, content.anchoredPosition);
         previousContentPosition = scrollRect.normalizedPosition;
     }
@@ -59,7 +60,7 @@ public class PoolableScroll : MonoBehaviour
         viewsData[elementIndex].Max.y < anchoredPosition.y;
 
     private bool IsBelowOfViewport(in int elementIndex, in Vector2 anchoredPosition) =>
-        viewsData[elementIndex].Min.y > anchoredPosition.y + viewportRect.height;
+        viewsData[elementIndex].Min.y > anchoredPosition.y + viewportHeight;
 
     private bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 anchoredPosition) =>
         !IsAboveOfViewport(elementIndex, anchoredPosition) &&
@@ -338,9 +339,9 @@ public class PoolableScroll : MonoBehaviour
 
 public readonly struct ElementViewData
 {
-    public Vector2 Min { get; }
-    public Vector2 Max { get; }
-    public Vector2 Position { get; }
+    public readonly Vector2 Min;
+    public readonly Vector2 Max;
+    public readonly Vector2 Position;
 
     public ElementViewData(Vector2 position, Vector2 size)
     {
