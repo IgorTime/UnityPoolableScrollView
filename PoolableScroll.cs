@@ -25,7 +25,7 @@ public class PoolableScroll : MonoBehaviour
     private IElementData[] itemsData;
     private ElementViewData[] viewsData;
     private Vector2? previousContentPosition;
-
+    private int activeItemsCount;
     private float viewportHeight;
     private Rect contentRect;
     private RectTransform content;
@@ -83,6 +83,7 @@ public class PoolableScroll : MonoBehaviour
         var elementView = GetElementView(data);
         elementView.Initialize(data, index);
         elementView.GetComponent<RectTransform>().anchoredPosition = position;
+        activeItemsCount++;
         return elementView;
     }
 
@@ -240,7 +241,7 @@ public class PoolableScroll : MonoBehaviour
     {
         firstIndex--;
 
-        if (First != null)
+        if (activeItemsCount > 0)
         {
             ReleaseElement(First);
             activeElements.RemoveFirst();
@@ -251,7 +252,7 @@ public class PoolableScroll : MonoBehaviour
     {
         lastIndex++;
 
-        if (Last != null)
+        if (activeItemsCount > 0)
         {
             ReleaseElement(Last);
             activeElements.RemoveLast();
@@ -286,6 +287,7 @@ public class PoolableScroll : MonoBehaviour
     {
         var pool = GetElementPool(element.Data.PrefabPath);
         pool.Release(element);
+        activeItemsCount--;
     }
 
     private bool IsScrolledToTheEnd() => firstIndex == itemsData.Length - 1;
