@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
@@ -29,6 +30,7 @@ public class PoolableScroll : MonoBehaviour
     private float viewportHeight;
     private Rect contentRect;
     private RectTransform content;
+    private float highestElementHeight;
     private ElementView First => activeElements?.First?.Value;
     private ElementView Last => activeElements?.Last?.Value;
 
@@ -48,12 +50,13 @@ public class PoolableScroll : MonoBehaviour
         viewsData = new ElementViewData[itemsData.Length];
         content = scrollRect.content;
         SetContentSize(itemsData);
-        
+
         contentRect = scrollRect.content.rect;
         viewportHeight = scrollRect.viewport.rect.height;
 
         CreateInitialElements(itemsData, content.anchoredPosition);
-        previousContentPosition = scrollRect.normalizedPosition;
+        previousContentPosition = content.anchoredPosition;
+        highestElementHeight = elementPools.Values.Max(x => x.Peek().Size.y);
     }
 
     private bool IsAboveOfViewport(in int elementIndex, in Vector2 anchoredPosition) =>
@@ -82,7 +85,7 @@ public class PoolableScroll : MonoBehaviour
     {
         var elementView = GetElementView(data);
         elementView.Initialize(data, index);
-        elementView.GetComponent<RectTransform>().anchoredPosition = position;
+        elementView.RectTransform.anchoredPosition = position;
         activeItemsCount++;
         return elementView;
     }
@@ -160,17 +163,57 @@ public class PoolableScroll : MonoBehaviour
             return;
         }
 
-        var contentDeltaPosition = GetContentDeltaPosition(contentPosition);
         var contentAnchoredPosition = content.anchoredPosition;
+        var contentDeltaPosition = GetContentDeltaPosition(contentAnchoredPosition);
+        if(Mathf.Abs(contentDeltaPosition.y) > highestElementHeight * 10)
+        {
+            ReinitAllItems(contentAnchoredPosition);
+            return;
+        }
+
         switch (contentDeltaPosition.y)
         {
-            case > 0:
+            case < 0:
                 HandleMoveDown(contentAnchoredPosition);
                 break;
-            case < 0:
+            case > 0:
                 HandleMoveUp(contentAnchoredPosition);
                 break;
         }
+    }
+
+    private void ReinitAllItems(Vector2 contentAnchoredPosition)
+    {
+        ReleaseAllItems();
+        var index = FindFirstItemVisibleInViewportVertical(contentAnchoredPosition);
+        firstIndex = index;
+        lastIndex = index;
+
+        activeElements.AddFirst(CreateElement(
+            itemsData[index],
+            CalculateVerticalPositionInContent(index),
+            index));
+
+        while (TryCreateNewTrailItem(contentAnchoredPosition))
+        {
+        }
+        
+        while (TryCreateNewHeadItem(contentAnchoredPosition))
+        {
+        }
+    }
+
+    private void ReleaseAllItems()
+    {
+        while (activeElements.Count > 0)
+        {
+            ReleaseElement(activeElements.First.Value);
+            activeElements.RemoveFirst();
+        }
+
+        firstIndex = 0;
+        lastIndex = 0;
+        activeItemsCount = 0;
     }
 
     private bool IsScrollEmpty() => activeElements.Count == 0 || itemsData.Length == 0;
@@ -337,18 +380,33 @@ public class PoolableScroll : MonoBehaviour
             activeElements.AddLast(newElement);
         }
     }
-}
 
-public readonly struct ElementViewData
-{
-    public readonly Vector2 Min;
-    public readonly Vector2 Max;
-    public readonly Vector2 Position;
-
-    public ElementViewData(Vector2 position, Vector2 size)
+    private int FindFirstItemVisibleInViewportVertical(in Vector2 contentAnchoredPosition)
     {
-        Position = position;
-        Min = position - size * 0.5f;
-        Max = position + size * 0.5f;
+        var startIndex = 0;
+        var endIndex = viewsData.Length - 1;
+        while (true)
+        {
+            if (startIndex == endIndex)
+            {
+                return -1;
+            }
+
+            var middleIndex = startIndex + (endIndex - startIndex) / 2;
+            if (IsPartiallyVisibleInViewport(middleIndex, contentAnchoredPosition))
+            {
+                return middleIndex;
+            }
+
+            var middleElement = viewsData[middleIndex];
+            if (middleElement.Position.y > contentAnchoredPosition.y)
+            {
+                endIndex = middleIndex - 1;
+            }
+            else
+            {
+                startIndex = middleIndex + 1;
+            }
+        }
     }
 }
