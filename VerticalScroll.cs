@@ -1,4 +1,3 @@
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,21 +10,14 @@ public class VerticalScroll : PoolableScroll
         for (var i = 0; i < elementsData.Length; i++)
         {
             CreateNewHeadElement(anchoredPosition);
-            if (IsBelowOfViewport(headIndex, anchoredPosition))
+            if (!IsPartiallyVisibleInViewport(headIndex, anchoredPosition))
             {
                 break;
             }
         }
     }
 
-    protected override void SetContentSize(IElementData[] itemsData)
-    {
-        var height = CalculateFullContentHeightAndViewsData(itemsData);
-        content.sizeDelta = new Vector2(content.sizeDelta.x, height);
-    }
-
-    protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => 
-        contentDeltaPosition.y > 0;
+    protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => contentDeltaPosition.y > 0;
 
     protected override bool IsFastScrolling(in Vector2 deltaPosition) =>
         Mathf.Abs(deltaPosition.y) > viewportHeight * 2;
@@ -51,26 +43,21 @@ public class VerticalScroll : PoolableScroll
         }
     }
 
-    protected override bool TryRemoveHeadItem(in Vector2 anchoredPosition)
+    protected override void InitViewsData(IElementData[] dataElements, out Vector2 contentSize)
     {
-        if (!IsBelowOfViewport(headIndex, anchoredPosition))
+        viewsData = new ElementViewData [dataElements.Length];
+
+        var contentHeight = 0f;
+        for (var i = 0; i < dataElements.Length; i++)
         {
-            return false;
+            var elementSize = GetElementSize(dataElements[i]);
+            var elementPosition = new Vector2(0, contentHeight + elementSize.y * 0.5f);
+            viewsData[i] = new ElementViewData(elementPosition, elementSize);
+
+            contentHeight += elementSize.y;
         }
 
-        ReleaseFirstElement();
-        return true;
-    }
-
-    protected override bool TryRemoveTrailItem(in Vector2 anchoredPosition)
-    {
-        if (!IsAboveOfViewport(trailIndex, anchoredPosition))
-        {
-            return false;
-        }
-
-        ReleaseLastElement();
-        return true;
+        contentSize = new Vector2(contentRect.width, contentHeight);
     }
 
     protected override bool TryCreateNewTrailItem(in Vector2 anchoredPosition)
@@ -97,6 +84,15 @@ public class VerticalScroll : PoolableScroll
         return true;
     }
 
+    protected override bool IsOutOfViewportInForwardDirection(int itemIndex, in Vector2 anchoredPosition) =>
+        IsBelowOfViewport(itemIndex, anchoredPosition);
+    
+    protected override bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 anchoredPosition) =>
+        IsAboveOfViewport(itemIndex, anchoredPosition);
+
+    protected override Vector2 CalculateItemPositionInContent(in int itemIndex) =>
+        new(0, contentRect.height * 0.5f - viewsData[itemIndex].Position.y);
+
     private bool IsAboveOfViewport(in int elementIndex, in Vector2 anchoredPosition) =>
         viewsData[elementIndex].Max.y < anchoredPosition.y;
 
@@ -107,21 +103,6 @@ public class VerticalScroll : PoolableScroll
         !IsAboveOfViewport(elementIndex, anchoredPosition) &&
         !IsBelowOfViewport(elementIndex, anchoredPosition);
 
-    private float CalculateFullContentHeightAndViewsData(IElementData[] elementsData)
-    {
-        var contentHeight = 0f;
-        for (var i = 0; i < elementsData.Length; i++)
-        {
-            var elementSize = GetElementSize(elementsData[i]);
-            var elementPosition = new float2(0, contentHeight + elementSize.y * 0.5f);
-            viewsData[i] = new ElementViewData(elementPosition, elementSize);
-
-            contentHeight += elementSize.y;
-        }
-
-        return contentHeight;
-    }
-
     private void CreateNewHeadElement(in Vector2 anchoredPosition)
     {
         headIndex++;
@@ -131,9 +112,6 @@ public class VerticalScroll : PoolableScroll
             CreateHeadItem(headIndex);
         }
     }
-
-    protected override Vector2 CalculateItemPositionInContent(in int itemIndex) =>
-        new(0, contentRect.height * 0.5f - viewsData[itemIndex].Position.y);
 
     private void CreateNewTrailElement(in Vector2 anchoredPosition)
     {
