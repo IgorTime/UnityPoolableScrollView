@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(PoolableScroll))]
@@ -9,10 +10,10 @@ public abstract class PoolableScroll : MonoBehaviour
     protected ScrollRect scrollRect;
 
     [SerializeField]
-    protected int firstIndex;
+    protected int headIndex;
 
     [SerializeField]
-    protected int lastIndex;
+    protected int trailIndex;
 
     protected readonly LinkedList<ElementView> activeElements = new();
     protected readonly Dictionary<string, ScrollElementsPool> elementPools = new();
@@ -76,15 +77,15 @@ public abstract class PoolableScroll : MonoBehaviour
 
         if (IsMovingForward(contentDeltaPosition))
         {
-            HandleMoveForward(contentAnchoredPosition);
+            HandleMovementForward(contentAnchoredPosition);
         }
         else
         {
-            HandleMoveBackward(contentAnchoredPosition);
+            HandleMovementBackward(contentAnchoredPosition);
         }
     }
 
-    private void HandleMoveBackward(in Vector2 contentAnchoredPosition)
+    private void HandleMovementBackward(in Vector2 contentAnchoredPosition)
     {
         if (IsScrolledToTheStart())
         {
@@ -100,7 +101,7 @@ public abstract class PoolableScroll : MonoBehaviour
         }
     }
 
-    private void HandleMoveForward(in Vector2 contentAnchoredPosition)
+    private void HandleMovementForward(in Vector2 contentAnchoredPosition)
     {
         if (IsScrolledToTheEnd())
         {
@@ -116,8 +117,8 @@ public abstract class PoolableScroll : MonoBehaviour
         }
     }
     
-    protected bool IsScrolledToTheEnd() => firstIndex == itemsData.Length - 1;
-    protected bool IsScrolledToTheStart() => lastIndex == 0;
+    protected bool IsScrolledToTheEnd() => headIndex == itemsData.Length - 1;
+    protected bool IsScrolledToTheStart() => trailIndex == 0;
 
     protected abstract bool TryCreateNewTrailItem(in Vector2 contentAnchoredPosition);
     protected abstract bool TryRemoveTrailItem(in Vector2 contentAnchoredPosition);
@@ -127,6 +128,7 @@ public abstract class PoolableScroll : MonoBehaviour
     protected abstract bool IsMovingForward(in Vector2 contentDeltaPosition);
     protected abstract bool IsFastScrolling(in Vector2 contentDeltaPosition);
     protected abstract void ReinitAllItems(in Vector2 contentAnchoredPosition);
+    protected abstract Vector2 CalculateItemPositionInContent(in int itemIndex);
 
     private Vector2 GetContentDeltaPosition(Vector2 contentPosition)
     {
@@ -187,12 +189,34 @@ public abstract class PoolableScroll : MonoBehaviour
         var pool = GetElementPool(data.PrefabPath);
         return pool.Get();
     }
-    
-    protected void ReleaseElement(ElementView element)
+
+    private void ReleaseElement(ElementView element)
     {
         var pool = GetElementPool(element.Data.PrefabPath);
         pool.Release(element);
         activeItemsCount--;
+    }
+    
+    protected void ReleaseFirstElement()
+    {
+        headIndex--;
+
+        if (activeItemsCount > 0)
+        {
+            ReleaseElement(First);
+            activeElements.RemoveFirst();
+        }
+    }
+
+    protected void ReleaseLastElement()
+    {
+        trailIndex++;
+
+        if (activeItemsCount > 0)
+        {
+            ReleaseElement(Last);
+            activeElements.RemoveLast();
+        }
     }
     
     protected void ReleaseAllItems()
@@ -203,8 +227,29 @@ public abstract class PoolableScroll : MonoBehaviour
             activeElements.RemoveFirst();
         }
 
-        firstIndex = 0;
-        lastIndex = 0;
+        headIndex = 0;
+        trailIndex = 0;
         activeItemsCount = 0;
     }
+
+    protected void CreateHeadItem(in int itemIndex)
+    {
+        var newElement = CreateElement(
+            itemsData[itemIndex],
+            CalculateItemPositionInContent(itemIndex),
+            itemIndex);
+
+        activeElements.AddFirst(newElement);
+    }
+
+    protected void CreateTrailItem(in int itemIndex)
+    {
+        var newElement = CreateElement(
+            itemsData[itemIndex],
+            CalculateItemPositionInContent(itemIndex),
+            itemIndex);
+
+        activeElements.AddLast(newElement);
+    }
+
 }
