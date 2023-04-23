@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,98 +5,9 @@ using UnityEngine.UI;
 [RequireComponent(typeof(ScrollRect))]
 public class VerticalScroll : PoolableScroll
 {
-    [SerializeField]
-    private int firstIndex;
-
-    [SerializeField]
-    private int lastIndex;
-
-    private readonly LinkedList<ElementView> activeElements = new();
-    private readonly Dictionary<string, ScrollElementsPool> elementPools = new();
-    private IElementData[] itemsData;
-    private ElementViewData[] viewsData;
-    private Vector2? previousContentPosition;
-    private int activeItemsCount;
-    private float viewportHeight;
-    private Rect contentRect;
-    private RectTransform content;
-    private ElementView First => activeElements?.First?.Value;
-    private ElementView Last => activeElements?.Last?.Value;
-
-    private void OnEnable()
+    protected override void CreateInitialElements(IElementData[] elementsData, in Vector2 anchoredPosition)
     {
-        scrollRect.onValueChanged.AddListener(UpdateScrollItems);
-    }
-
-    private void OnDisable()
-    {
-        scrollRect.onValueChanged.RemoveListener(UpdateScrollItems);
-    }
-
-    public void Initialize(IElementData[] itemsData)
-    {
-        this.itemsData = itemsData;
-        viewsData = new ElementViewData[itemsData.Length];
-        content = scrollRect.content;
-        SetContentSize(itemsData);
-
-        contentRect = scrollRect.content.rect;
-        viewportHeight = scrollRect.viewport.rect.height;
-
-        CreateInitialElements(itemsData, content.anchoredPosition);
-        previousContentPosition = content.anchoredPosition;
-    }
-
-    private bool IsAboveOfViewport(in int elementIndex, in Vector2 anchoredPosition) =>
-        viewsData[elementIndex].Max.y < anchoredPosition.y;
-
-    private bool IsBelowOfViewport(in int elementIndex, in Vector2 anchoredPosition) =>
-        viewsData[elementIndex].Min.y > anchoredPosition.y + viewportHeight;
-
-    private bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 anchoredPosition) =>
-        !IsAboveOfViewport(elementIndex, anchoredPosition) &&
-        !IsBelowOfViewport(elementIndex, anchoredPosition);
-
-    private Vector2 GetElementSize(IElementData data)
-    {
-        var prefab = PeekElementView(data);
-        return prefab.Size;
-    }
-
-    private ElementView PeekElementView(IElementData data)
-    {
-        var pool = GetElementPool(data.PrefabPath);
-        return pool.Peek();
-    }
-
-    private ElementView CreateElement(IElementData data, Vector2 position, int index)
-    {
-        var elementView = GetElementView(data);
-        elementView.Initialize(data, index);
-        elementView.RectTransform.anchoredPosition = position;
-        activeItemsCount++;
-        return elementView;
-    }
-
-    private ElementView GetElementView(IElementData data)
-    {
-        var pool = GetElementPool(data.PrefabPath);
-        return pool.Get();
-    }
-
-    private ScrollElementsPool GetElementPool(string prefabPath)
-    {
-        if (!elementPools.TryGetValue(prefabPath, out var pool))
-        {
-            elementPools[prefabPath] = pool = new ScrollElementsPool(prefabPath, content);
-        }
-
-        return pool;
-    }
-
-    private void CreateInitialElements(ICollection elementsData, in Vector2 anchoredPosition)
-    {
-        for (var i = 0; i < elementsData.Count; i++)
+        for (var i = 0; i < elementsData.Length; i++)
         {
             if (i == 0)
             {
@@ -114,28 +23,13 @@ public class VerticalScroll : PoolableScroll
         }
     }
 
-    private void SetContentSize(IElementData[] itemsData)
+    protected override void SetContentSize(IElementData[] itemsData)
     {
         var height = CalculateFullContentHeightAndViewsData(itemsData);
         content.sizeDelta = new Vector2(content.sizeDelta.x, height);
     }
 
-    private float CalculateFullContentHeightAndViewsData(IElementData[] elementsData)
-    {
-        var contentHeight = 0f;
-        for (var i = 0; i < elementsData.Length; i++)
-        {
-            var elementSize = GetElementSize(elementsData[i]);
-            var elementPosition = new float2(0, contentHeight + elementSize.y * 0.5f);
-            viewsData[i] = new ElementViewData(elementPosition, elementSize);
-
-            contentHeight += elementSize.y;
-        }
-
-        return contentHeight;
-    }
-
-    private void UpdateScrollItems(Vector2 contentPosition)
+    protected override void UpdateScrollItems(Vector2 contentPosition)
     {
         if (IsScrollEmpty())
         {
@@ -159,6 +53,31 @@ public class VerticalScroll : PoolableScroll
                 HandleMoveUp(contentAnchoredPosition);
                 break;
         }
+    }
+
+    private bool IsAboveOfViewport(in int elementIndex, in Vector2 anchoredPosition) =>
+        viewsData[elementIndex].Max.y < anchoredPosition.y;
+
+    private bool IsBelowOfViewport(in int elementIndex, in Vector2 anchoredPosition) =>
+        viewsData[elementIndex].Min.y > anchoredPosition.y + viewportHeight;
+
+    private bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 anchoredPosition) =>
+        !IsAboveOfViewport(elementIndex, anchoredPosition) &&
+        !IsBelowOfViewport(elementIndex, anchoredPosition);
+
+    private float CalculateFullContentHeightAndViewsData(IElementData[] elementsData)
+    {
+        var contentHeight = 0f;
+        for (var i = 0; i < elementsData.Length; i++)
+        {
+            var elementSize = GetElementSize(elementsData[i]);
+            var elementPosition = new float2(0, contentHeight + elementSize.y * 0.5f);
+            viewsData[i] = new ElementViewData(elementPosition, elementSize);
+
+            contentHeight += elementSize.y;
+        }
+
+        return contentHeight;
     }
 
     private bool IsFastVerticalScrolling(in Vector2 deltaPosition) => Mathf.Abs(deltaPosition.y) > viewportHeight * 2;
@@ -305,13 +224,6 @@ public class VerticalScroll : PoolableScroll
 
         CreateNewFirstElement(anchoredPosition);
         return true;
-    }
-
-    private void ReleaseElement(ElementView element)
-    {
-        var pool = GetElementPool(element.Data.PrefabPath);
-        pool.Release(element);
-        activeItemsCount--;
     }
 
     private bool IsScrolledToTheEnd() => firstIndex == itemsData.Length - 1;
