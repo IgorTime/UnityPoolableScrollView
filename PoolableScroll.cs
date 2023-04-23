@@ -54,14 +54,47 @@ public abstract class PoolableScroll : MonoBehaviour
         SetContentSize(itemsData);
 
         contentRect = scrollRect.content.rect;
-        viewportHeight = scrollRect.viewport.rect.height;
 
         CreateInitialElements(itemsData, content.anchoredPosition);
         previousContentPosition = content.anchoredPosition;
     }
 
-    protected abstract void UpdateScrollItems(Vector2 contentPosition);
+    private void UpdateScrollItems(Vector2 contentPosition)
+    {
+        if (IsScrollEmpty())
+        {
+            return;
+        }
 
+        var contentAnchoredPosition = content.anchoredPosition;
+        var contentDeltaPosition = GetContentDeltaPosition(contentAnchoredPosition);
+        if (IsFastScrolling(contentDeltaPosition))
+        {
+            ReinitAllItems(contentAnchoredPosition);
+            return;
+        }
+
+        HandleMovement(contentDeltaPosition, contentAnchoredPosition);
+    }
+
+    protected abstract void HandleMovement(
+        in Vector2 contentDeltaPosition,
+        in Vector2 contentAnchoredPosition);
+
+    protected abstract bool IsFastScrolling(in Vector2 contentDeltaPosition);
+
+    protected abstract void ReinitAllItems(in Vector2 contentAnchoredPosition);
+
+    private Vector2 GetContentDeltaPosition(Vector2 contentPosition)
+    {
+        previousContentPosition ??= contentPosition;
+        var contentDeltaPosition = contentPosition - previousContentPosition;
+        previousContentPosition = contentPosition;
+        return contentDeltaPosition.Value;
+    }
+
+    private bool IsScrollEmpty() => activeElements.Count == 0 || itemsData.Length == 0;
+    
     protected abstract void CreateInitialElements(
         IElementData[] dataElements,
         in Vector2 contentAnchoredPosition);
@@ -82,7 +115,7 @@ public abstract class PoolableScroll : MonoBehaviour
         return prefab.Size;
     }
 
-    protected ElementView PeekElementView(IElementData data)
+    private ElementView PeekElementView(IElementData data)
     {
         var pool = GetElementPool(data.PrefabPath);
         return pool.Peek();
@@ -118,5 +151,18 @@ public abstract class PoolableScroll : MonoBehaviour
         var pool = GetElementPool(element.Data.PrefabPath);
         pool.Release(element);
         activeItemsCount--;
+    }
+    
+    protected void ReleaseAllItems()
+    {
+        while (activeElements.Count > 0)
+        {
+            ReleaseElement(activeElements.First.Value);
+            activeElements.RemoveFirst();
+        }
+
+        firstIndex = 0;
+        lastIndex = 0;
+        activeItemsCount = 0;
     }
 }

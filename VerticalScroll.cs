@@ -29,21 +29,10 @@ public class VerticalScroll : PoolableScroll
         content.sizeDelta = new Vector2(content.sizeDelta.x, height);
     }
 
-    protected override void UpdateScrollItems(Vector2 contentPosition)
+    protected override void HandleMovement(
+        in Vector2 contentDeltaPosition,
+        in Vector2 contentAnchoredPosition)
     {
-        if (IsScrollEmpty())
-        {
-            return;
-        }
-
-        var contentAnchoredPosition = content.anchoredPosition;
-        var contentDeltaPosition = GetContentDeltaPosition(contentAnchoredPosition);
-        if (IsFastVerticalScrolling(contentDeltaPosition))
-        {
-            ReinitAllItems(contentAnchoredPosition);
-            return;
-        }
-
         switch (contentDeltaPosition.y)
         {
             case < 0:
@@ -52,6 +41,30 @@ public class VerticalScroll : PoolableScroll
             case > 0:
                 HandleMoveUp(contentAnchoredPosition);
                 break;
+        }
+    }
+
+    protected override bool IsFastScrolling(in Vector2 deltaPosition) =>
+        Mathf.Abs(deltaPosition.y) > viewportHeight * 2;
+
+    protected override void ReinitAllItems(in Vector2 contentAnchoredPosition)
+    {
+        ReleaseAllItems();
+        var index = FindFirstItemVisibleInViewportVertical(contentAnchoredPosition);
+        firstIndex = index;
+        lastIndex = index;
+
+        activeElements.AddFirst(CreateElement(
+            itemsData[index],
+            CalculateVerticalPositionInContent(index),
+            index));
+
+        while (TryCreateNewTrailItem(contentAnchoredPosition))
+        {
+        }
+
+        while (TryCreateNewHeadItem(contentAnchoredPosition))
+        {
         }
     }
 
@@ -79,52 +92,7 @@ public class VerticalScroll : PoolableScroll
 
         return contentHeight;
     }
-
-    private bool IsFastVerticalScrolling(in Vector2 deltaPosition) => Mathf.Abs(deltaPosition.y) > viewportHeight * 2;
-
-    private void ReinitAllItems(Vector2 contentAnchoredPosition)
-    {
-        ReleaseAllItems();
-        var index = FindFirstItemVisibleInViewportVertical(contentAnchoredPosition);
-        firstIndex = index;
-        lastIndex = index;
-
-        activeElements.AddFirst(CreateElement(
-            itemsData[index],
-            CalculateVerticalPositionInContent(index),
-            index));
-
-        while (TryCreateNewTrailItem(contentAnchoredPosition))
-        {
-        }
-
-        while (TryCreateNewHeadItem(contentAnchoredPosition))
-        {
-        }
-    }
-
-    private void ReleaseAllItems()
-    {
-        while (activeElements.Count > 0)
-        {
-            ReleaseElement(activeElements.First.Value);
-            activeElements.RemoveFirst();
-        }
-
-        firstIndex = 0;
-        lastIndex = 0;
-        activeItemsCount = 0;
-    }
-
-    private bool IsScrollEmpty() => activeElements.Count == 0 || itemsData.Length == 0;
-
-    private Vector2 GetContentDeltaPosition(Vector2 contentPosition)
-    {
-        previousContentPosition ??= contentPosition;
-        var contentDeltaPosition = contentPosition - previousContentPosition;
-        previousContentPosition = contentPosition;
-        return contentDeltaPosition.Value;
-    }
+    
 
     private void HandleMoveDown(Vector2 contentAnchoredPosition)
     {
