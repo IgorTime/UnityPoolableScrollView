@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(PoolableScroll))]
+[RequireComponent(typeof(ScrollRect))]
 public abstract class PoolableScroll : MonoBehaviour
 {
     [SerializeField]
@@ -25,7 +25,7 @@ public abstract class PoolableScroll : MonoBehaviour
     private IElementData[] itemsData;
     private Vector2? previousContentPosition;
     private int activeItemsCount;
-    private RectTransform content;
+    protected RectTransform content;
 
     private ElementView First => activeElements?.First?.Value;
     private ElementView Last => activeElements?.Last?.Value;

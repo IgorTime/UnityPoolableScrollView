@@ -7,7 +7,7 @@ public class HorizontalScroll : PoolableScroll
     protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => contentDeltaPosition.x > 0;
 
     protected override bool IsFastScrolling(in Vector2 deltaPosition) =>
-        Mathf.Abs(deltaPosition.x) > ViewportHeight * 2;
+        Mathf.Abs(deltaPosition.x) > ViewportWidth * 2;
 
     protected override void InitViewsData(IElementData[] dataElements, out Vector2 contentSize)
     {
@@ -17,13 +17,13 @@ public class HorizontalScroll : PoolableScroll
         for (var i = 0; i < dataElements.Length; i++)
         {
             var elementSize = GetElementSize(dataElements[i]);
-            var elementPosition = new Vector2(contentWidth + elementSize.y * 0.5f, 0);
+            var elementPosition = new Vector2(contentWidth + elementSize.x * 0.5f, 0);
             ViewsData[i] = new ElementViewData(elementPosition, elementSize);
 
             contentWidth += elementSize.x;
         }
 
-        contentSize = new Vector2(contentWidth, ContentRect.height);
+        contentSize = new Vector2(contentWidth, content.sizeDelta.y);
     }
 
     protected override bool IsOutOfViewportInForwardDirection(int itemIndex, in Vector2 anchoredPosition) =>
