@@ -60,9 +60,9 @@ public abstract class PoolableScroll : MonoBehaviour
     protected abstract bool IsMovingForward(in Vector2 contentDeltaPosition);
     protected abstract bool IsFastScrolling(in Vector2 contentDeltaPosition);
     protected abstract Vector2 CalculateItemPositionInContent(in int itemIndex);
-    protected abstract bool IsOutOfViewportInForwardDirection(int itemIndex, in Vector2 anchoredPosition);
-    protected abstract bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 anchoredPosition);
-    protected abstract bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 anchoredPosition);
+    protected abstract bool IsOutOfViewportInForwardDirection(int itemIndex, in Vector2 contentAnchoredPosition);
+    protected abstract bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 contentAnchoredPosition);
+    protected abstract bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 contentAnchoredPosition);
     protected abstract int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition);
 
     protected Vector2 GetElementSize(IElementData data)

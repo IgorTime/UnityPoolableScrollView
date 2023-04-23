@@ -31,18 +31,18 @@ public class VerticalScroll : PoolableScroll
         contentSize = new Vector2(Content.sizeDelta.x, contentHeight);
     }
 
-    protected override bool IsOutOfViewportInForwardDirection(int itemIndex, in Vector2 anchoredPosition) =>
-        ViewsData[itemIndex].Min.y > anchoredPosition.y + ViewportHeight; // IsBelowOfViewport
+    protected override bool IsOutOfViewportInForwardDirection(int itemIndex, in Vector2 contentAnchoredPosition) =>
+        ViewsData[itemIndex].Min.y > contentAnchoredPosition.y + ViewportHeight; // IsBelowOfViewport
 
-    protected override bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 anchoredPosition) =>
-        ViewsData[itemIndex].Max.y < anchoredPosition.y; // IsAboveOfViewport
+    protected override bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 contentAnchoredPosition) =>
+        ViewsData[itemIndex].Max.y < contentAnchoredPosition.y; // IsAboveOfViewport
 
     protected override Vector2 CalculateItemPositionInContent(in int itemIndex) =>
         new(0, ContentRect.height * 0.5f - ViewsData[itemIndex].Position.y);
 
-    protected override bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 anchoredPosition) =>
-        !IsOutOfViewportInBackwardDirection(elementIndex, anchoredPosition) &&
-        !IsOutOfViewportInForwardDirection(elementIndex, anchoredPosition);
+    protected override bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 contentAnchoredPosition) =>
+        !IsOutOfViewportInBackwardDirection(elementIndex, contentAnchoredPosition) &&
+        !IsOutOfViewportInForwardDirection(elementIndex, contentAnchoredPosition);
 
     protected override int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition)
     {
