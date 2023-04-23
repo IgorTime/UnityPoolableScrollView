@@ -4,17 +4,15 @@ using UnityEngine.UI;
 [RequireComponent(typeof(ScrollRect))]
 public class VerticalScroll : PoolableScroll
 {
-    public override void ScrollToItem(int itemIndex)
-    {
-        Content.anchoredPosition = new Vector2(0, ViewsData[itemIndex].Position.y - ViewportHeight * 0.5f);
-    }
-
+    protected override Vector2 GetAnchoredPositionOfContentForItem(int itemIndex) => 
+        new(0, ViewsData[itemIndex].Position.y - ViewportHeight * 0.5f);
+    
     protected override int FindClosestItemToCenter()
     {
         var index = -1;
         var closestDistance = float.MaxValue;
         var contentCenter = Content.anchoredPosition.y + ViewportHeight * 0.5f;
-        for (var i = trailIndex; i <= headIndex; i++)
+        for (var i = TrailIndex; i <= HeadIndex; i++)
         {
             var distance = Mathf.Abs(ViewsData[i].Position.y - contentCenter);
             if (distance < closestDistance)
