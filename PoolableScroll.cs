@@ -8,31 +8,28 @@ public abstract class PoolableScroll : MonoBehaviour
     [SerializeField]
     protected ScrollRect scrollRect;
 
-    [SerializeField]
-    protected int headIndex;
-
-    [SerializeField]
-    protected int trailIndex;
-
     private readonly LinkedList<ElementView> activeElements = new();
     private readonly Dictionary<string, ScrollElementsPool> elementPools = new();
-    
+
     protected ElementViewData[] ViewsData;
     protected Rect ContentRect;
+    protected RectTransform Content;
     protected float ViewportHeight;
     protected float ViewportWidth;
-    
+
+    private int headIndex;
+    private int trailIndex;
+
     private IElementData[] itemsData;
     private Vector2? previousContentPosition;
     private int activeItemsCount;
-    protected RectTransform content;
 
     private ElementView First => activeElements?.First?.Value;
     private ElementView Last => activeElements?.Last?.Value;
 
     private void Awake()
     {
-        content = scrollRect.content;
+        Content = scrollRect.content;
 
         var viewportRect = scrollRect.viewport.rect;
         ViewportHeight = viewportRect.height;
@@ -53,10 +50,10 @@ public abstract class PoolableScroll : MonoBehaviour
     {
         this.itemsData = itemsData;
         InitViewsData(this.itemsData, out var contentSize);
-        content.sizeDelta = contentSize;
+        Content.sizeDelta = contentSize;
         ContentRect = scrollRect.content.rect;
-        previousContentPosition = content.anchoredPosition;
-        CreateInitialElements(itemsData, content.anchoredPosition);
+        previousContentPosition = Content.anchoredPosition;
+        CreateInitialElements(itemsData, Content.anchoredPosition);
     }
 
     protected abstract void InitViewsData(IElementData[] dataElements, out Vector2 contentSize);
@@ -150,7 +147,7 @@ public abstract class PoolableScroll : MonoBehaviour
             return;
         }
 
-        var contentAnchoredPosition = content.anchoredPosition;
+        var contentAnchoredPosition = Content.anchoredPosition;
         var contentDeltaPosition = GetContentDeltaPosition(contentAnchoredPosition);
         if (IsFastScrolling(contentDeltaPosition))
         {
@@ -295,7 +292,7 @@ public abstract class PoolableScroll : MonoBehaviour
     {
         if (!elementPools.TryGetValue(prefabPath, out var pool))
         {
-            elementPools[prefabPath] = pool = new ScrollElementsPool(prefabPath, content);
+            elementPools[prefabPath] = pool = new ScrollElementsPool(prefabPath, Content);
         }
 
         return pool;

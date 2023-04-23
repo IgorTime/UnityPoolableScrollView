@@ -23,7 +23,7 @@ public class HorizontalScroll : PoolableScroll
             contentWidth += elementSize.x;
         }
 
-        contentSize = new Vector2(contentWidth, content.sizeDelta.y);
+        contentSize = new Vector2(contentWidth, Content.sizeDelta.y);
     }
 
     protected override bool IsOutOfViewportInForwardDirection(int itemIndex, in Vector2 anchoredPosition) =>
