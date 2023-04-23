@@ -1,20 +1,19 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(ScrollRect))]
 public class HorizontalScroll : PoolableScroll
 {
-    public override void ScrollToItem(int itemIndex)
-    {
-        Content.anchoredPosition = new Vector2(-ViewsData[itemIndex].Position.x + ViewportWidth * 0.5f, 0);
-    }
-    
+    protected override Vector2 GetAnchoredPositionOfContentForItem(int itemIndex) =>
+        new(-ViewsData[itemIndex].Position.x + ViewportWidth * 0.5f, 0);
+
     protected override int FindClosestItemToCenter()
     {
         var index = -1;
         var closestDistance = float.MaxValue;
         var contentCenter = -Content.anchoredPosition.x + ViewportWidth * 0.5f;
-        for (var i = trailIndex; i <= headIndex; i++)
+        for (var i = TrailIndex; i <= HeadIndex; i++)
         {
             var distance = Mathf.Abs(ViewsData[i].Position.x - contentCenter);
             if (distance < closestDistance)
@@ -29,8 +28,7 @@ public class HorizontalScroll : PoolableScroll
 
     protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => contentDeltaPosition.x < 0;
 
-    protected override bool IsFastScrolling(in Vector2 deltaPosition) =>
-        Mathf.Abs(deltaPosition.x) > ViewportWidth * 2;
+    protected override bool IsFastScrolling(in Vector2 deltaPosition) => Mathf.Abs(deltaPosition.x) > ViewportWidth * 2;
 
     protected override void InitViewsData(IElementData[] dataElements, out Vector2 contentSize)
     {
