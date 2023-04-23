@@ -61,19 +61,12 @@ public abstract class PoolableScroll : MonoBehaviour
     protected bool IsScrolledToTheStart() => trailIndex == 0;
 
     protected abstract void InitViewsData(IElementData[] dataElements, out Vector2 contentSize);
-    protected abstract bool TryCreateNewTrailItem(in Vector2 contentAnchoredPosition);
-    protected abstract bool TryCreateNewHeadItem(in Vector2 contentAnchoredPosition);
     protected abstract bool IsMovingForward(in Vector2 contentDeltaPosition);
     protected abstract bool IsFastScrolling(in Vector2 contentDeltaPosition);
-    protected abstract void ReinitAllItems(in Vector2 contentAnchoredPosition);
     protected abstract Vector2 CalculateItemPositionInContent(in int itemIndex);
     protected abstract bool IsOutOfViewportInForwardDirection(int itemIndex, in Vector2 anchoredPosition);
     protected abstract bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 anchoredPosition);
 
-
-    protected abstract void CreateInitialElements(
-        IElementData[] dataElements,
-        in Vector2 contentAnchoredPosition);
 
     protected Vector2 GetElementSize(IElementData data)
     {
@@ -186,6 +179,27 @@ public abstract class PoolableScroll : MonoBehaviour
         }
     }
     
+    private void ReinitAllItems(in Vector2 contentAnchoredPosition)
+    {
+        ReleaseAllItems();
+        var index = FindFirstItemVisibleInViewport(contentAnchoredPosition);
+        headIndex = index;
+        trailIndex = index;
+
+        activeElements.AddFirst(CreateElement(
+            itemsData[index],
+            CalculateItemPositionInContent(index),
+            index));
+
+        while (TryCreateNewTrailItem(contentAnchoredPosition))
+        {
+        }
+
+        while (TryCreateNewHeadItem(contentAnchoredPosition))
+        {
+        }
+    }
+    
     private bool TryRemoveHeadItem(in Vector2 anchoredPosition)
     {
         if (!IsOutOfViewportInForwardDirection(headIndex, anchoredPosition))
@@ -208,6 +222,29 @@ public abstract class PoolableScroll : MonoBehaviour
         return true;
     }
 
+    private bool TryCreateNewTrailItem(in Vector2 anchoredPosition)
+    {
+        if (IsScrolledToTheStart() ||
+            IsOutOfViewportInBackwardDirection(trailIndex, anchoredPosition))
+        {
+            return false;
+        }
+
+        CreateNewTrailElement(anchoredPosition);
+        return true;
+    }
+
+    private bool TryCreateNewHeadItem(in Vector2 anchoredPosition)
+    {
+        if (IsScrolledToTheEnd() ||
+            IsOutOfViewportInForwardDirection(headIndex, anchoredPosition))
+        {
+            return false;
+        }
+
+        CreateNewHeadElement(anchoredPosition);
+        return true;
+    }
     
     private void HandleMovementForward(in Vector2 contentAnchoredPosition)
     {
@@ -271,4 +308,40 @@ public abstract class PoolableScroll : MonoBehaviour
         pool.Release(element);
         activeItemsCount--;
     }
+    
+    private void CreateNewHeadElement(in Vector2 anchoredPosition)
+    {
+        headIndex++;
+        if (IsPartiallyVisibleInViewport(headIndex, anchoredPosition) ||
+            IsOutOfViewportInForwardDirection(headIndex, anchoredPosition))
+        {
+            CreateHeadItem(headIndex);
+        }
+    }
+
+    private void CreateNewTrailElement(in Vector2 anchoredPosition)
+    {
+        trailIndex--;
+        if (IsPartiallyVisibleInViewport(trailIndex, anchoredPosition) ||
+            IsOutOfViewportInBackwardDirection(trailIndex, anchoredPosition))
+        {
+            CreateTrailItem(trailIndex);
+        }
+    }
+    
+    private void CreateInitialElements(IElementData[] elementsData, in Vector2 anchoredPosition)
+    {
+        headIndex = -1;
+        for (var i = 0; i < elementsData.Length; i++)
+        {
+            CreateNewHeadElement(anchoredPosition);
+            if (!IsPartiallyVisibleInViewport(headIndex, anchoredPosition))
+            {
+                break;
+            }
+        }
+    }
+
+    protected abstract int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition);
+    protected abstract bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 anchoredPosition);
 }
