@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
@@ -30,7 +29,6 @@ public class PoolableScroll : MonoBehaviour
     private float viewportHeight;
     private Rect contentRect;
     private RectTransform content;
-    private float highestElementHeight;
     private ElementView First => activeElements?.First?.Value;
     private ElementView Last => activeElements?.Last?.Value;
 
@@ -56,7 +54,6 @@ public class PoolableScroll : MonoBehaviour
 
         CreateInitialElements(itemsData, content.anchoredPosition);
         previousContentPosition = content.anchoredPosition;
-        highestElementHeight = elementPools.Values.Max(x => x.Peek().Size.y);
     }
 
     private bool IsAboveOfViewport(in int elementIndex, in Vector2 anchoredPosition) =>
@@ -165,7 +162,7 @@ public class PoolableScroll : MonoBehaviour
 
         var contentAnchoredPosition = content.anchoredPosition;
         var contentDeltaPosition = GetContentDeltaPosition(contentAnchoredPosition);
-        if(Mathf.Abs(contentDeltaPosition.y) > highestElementHeight * 10)
+        if (IsFastVerticalScrolling(contentDeltaPosition))
         {
             ReinitAllItems(contentAnchoredPosition);
             return;
@@ -182,6 +179,8 @@ public class PoolableScroll : MonoBehaviour
         }
     }
 
+    private bool IsFastVerticalScrolling(in Vector2 deltaPosition) => Mathf.Abs(deltaPosition.y) > viewportHeight * 2;
+
     private void ReinitAllItems(Vector2 contentAnchoredPosition)
     {
         ReleaseAllItems();
@@ -197,7 +196,7 @@ public class PoolableScroll : MonoBehaviour
         while (TryCreateNewTrailItem(contentAnchoredPosition))
         {
         }
-        
+
         while (TryCreateNewHeadItem(contentAnchoredPosition))
         {
         }
