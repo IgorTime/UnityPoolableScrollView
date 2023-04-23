@@ -8,10 +8,6 @@ using UnityEngine.UI;
 public class HorizontalScroll : PoolableScroll
 {
     [SerializeField]
-    [Range(0, 1)]
-    private float normalizedPosition = 1;
-
-    [SerializeField]
     private int firstIndex;
 
     [SerializeField]
@@ -98,17 +94,6 @@ public class HorizontalScroll : PoolableScroll
         }
 
         return pool;
-    }
-
-    private void OnValidate()
-    {
-        if (!scrollRect)
-        {
-            scrollRect = GetComponent<ScrollRect>();
-        }
-
-        var newPosition = new Vector2(scrollRect.normalizedPosition.x, normalizedPosition);
-        scrollRect.normalizedPosition = newPosition;
     }
 
     private void CreateInitialElements(ICollection elementsData, in Vector2 anchoredPosition)
