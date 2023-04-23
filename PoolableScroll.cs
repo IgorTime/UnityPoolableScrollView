@@ -84,9 +84,46 @@ public abstract class PoolableScroll : MonoBehaviour
         }
     }
 
+    private void HandleMoveBackward(in Vector2 contentAnchoredPosition)
+    {
+        if (IsScrolledToTheStart())
+        {
+            return;
+        }
+
+        while (TryRemoveHeadItem(contentAnchoredPosition))
+        {
+        }
+
+        while (TryCreateNewTrailItem(contentAnchoredPosition))
+        {
+        }
+    }
+
+    private void HandleMoveForward(in Vector2 contentAnchoredPosition)
+    {
+        if (IsScrolledToTheEnd())
+        {
+            return;
+        }
+
+        while (TryRemoveTrailItem(contentAnchoredPosition))
+        {
+        }
+
+        while (TryCreateNewHeadItem(contentAnchoredPosition))
+        {
+        }
+    }
+    
+    protected bool IsScrolledToTheEnd() => firstIndex == itemsData.Length - 1;
+    protected bool IsScrolledToTheStart() => lastIndex == 0;
+
+    protected abstract bool TryCreateNewTrailItem(in Vector2 contentAnchoredPosition);
+    protected abstract bool TryRemoveTrailItem(in Vector2 contentAnchoredPosition);
+    protected abstract bool TryRemoveHeadItem(in Vector2 contentAnchoredPosition);
+    protected abstract bool TryCreateNewHeadItem(in Vector2 contentAnchoredPosition);
     protected abstract void SetContentSize(IElementData[] dataElements);
-    protected abstract void HandleMoveBackward(in Vector2 contentAnchoredPosition);
-    protected abstract void HandleMoveForward(in Vector2 contentAnchoredPosition);
     protected abstract bool IsMovingForward(in Vector2 contentDeltaPosition);
     protected abstract bool IsFastScrolling(in Vector2 contentDeltaPosition);
     protected abstract void ReinitAllItems(in Vector2 contentAnchoredPosition);

@@ -55,36 +55,50 @@ public class VerticalScroll : PoolableScroll
         }
     }
 
-    protected override void HandleMoveBackward(in Vector2 contentAnchoredPosition)
+    protected override bool TryRemoveHeadItem(in Vector2 anchoredPosition)
     {
-        if (IsScrolledToTheStart())
+        if (!IsBelowOfViewport(firstIndex, anchoredPosition))
         {
-            return;
+            return false;
         }
 
-        while (TryRemoveHeadItem(contentAnchoredPosition))
-        {
-        }
-
-        while (TryCreateNewTrailItem(contentAnchoredPosition))
-        {
-        }
+        ReleaseFirstElement();
+        return true;
     }
 
-    protected override void HandleMoveForward(in Vector2 contentAnchoredPosition)
+    protected override bool TryRemoveTrailItem(in Vector2 anchoredPosition)
     {
-        if (IsScrolledToTheEnd())
+        if (!IsAboveOfViewport(lastIndex, anchoredPosition))
         {
-            return;
+            return false;
         }
 
-        while (TryRemoveTrailItem(contentAnchoredPosition))
+        ReleaseLastElement();
+        return true;
+    }
+
+    protected override bool TryCreateNewTrailItem(in Vector2 anchoredPosition)
+    {
+        if (IsScrolledToTheStart() ||
+            IsAboveOfViewport(lastIndex, anchoredPosition))
         {
+            return false;
         }
 
-        while (TryCreateNewHeadItem(contentAnchoredPosition))
+        CreateNewTrailElement(anchoredPosition);
+        return true;
+    }
+
+    protected override bool TryCreateNewHeadItem(in Vector2 anchoredPosition)
+    {
+        if (IsScrolledToTheEnd() ||
+            IsBelowOfViewport(firstIndex, anchoredPosition))
         {
+            return false;
         }
+
+        CreateNewFirstElement(anchoredPosition);
+        return true;
     }
 
     private bool IsAboveOfViewport(in int elementIndex, in Vector2 anchoredPosition) =>
@@ -112,28 +126,6 @@ public class VerticalScroll : PoolableScroll
         return contentHeight;
     }
 
-    private bool TryRemoveHeadItem(in Vector2 anchoredPosition)
-    {
-        if (!IsBelowOfViewport(firstIndex, anchoredPosition))
-        {
-            return false;
-        }
-
-        ReleaseFirstElement();
-        return true;
-    }
-
-    private bool TryRemoveTrailItem(in Vector2 anchoredPosition)
-    {
-        if (!IsAboveOfViewport(lastIndex, anchoredPosition))
-        {
-            return false;
-        }
-
-        ReleaseLastElement();
-        return true;
-    }
-
     private void ReleaseFirstElement()
     {
         firstIndex--;
@@ -155,33 +147,6 @@ public class VerticalScroll : PoolableScroll
             activeElements.RemoveLast();
         }
     }
-
-    private bool TryCreateNewTrailItem(in Vector2 anchoredPosition)
-    {
-        if (IsScrolledToTheStart() ||
-            IsAboveOfViewport(lastIndex, anchoredPosition))
-        {
-            return false;
-        }
-
-        CreateNewTrailElement(anchoredPosition);
-        return true;
-    }
-
-    private bool TryCreateNewHeadItem(in Vector2 anchoredPosition)
-    {
-        if (IsScrolledToTheEnd() ||
-            IsBelowOfViewport(firstIndex, anchoredPosition))
-        {
-            return false;
-        }
-
-        CreateNewFirstElement(anchoredPosition);
-        return true;
-    }
-
-    private bool IsScrolledToTheEnd() => firstIndex == itemsData.Length - 1;
-    private bool IsScrolledToTheStart() => lastIndex == 0;
 
     private void CreateVeryFirstElement()
     {
