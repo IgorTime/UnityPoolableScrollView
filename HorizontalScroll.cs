@@ -67,4 +67,9 @@ public class HorizontalScroll : PoolableScroll
             }
         }
     }
+
+    public override void ScrollToItem(int itemIndex)
+    {
+        
+    }
 }

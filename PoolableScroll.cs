@@ -343,4 +343,6 @@ public abstract class PoolableScroll : MonoBehaviour
             }
         }
     }
+
+    public abstract void ScrollToItem(int itemIndex);
 }

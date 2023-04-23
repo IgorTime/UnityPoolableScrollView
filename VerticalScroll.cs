@@ -4,6 +4,11 @@ using UnityEngine.UI;
 [RequireComponent(typeof(ScrollRect))]
 public class VerticalScroll : PoolableScroll
 {
+    public override void ScrollToItem(int itemIndex)
+    {
+        Content.anchoredPosition = new Vector2(0, ViewsData[itemIndex].Position.y - ViewportHeight * 0.5f);
+    }
+
     protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => contentDeltaPosition.y > 0;
 
     protected override bool IsFastScrolling(in Vector2 deltaPosition) =>
