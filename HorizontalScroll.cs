@@ -9,6 +9,24 @@ public class HorizontalScroll : PoolableScroll
         Content.anchoredPosition = new Vector2(-ViewsData[itemIndex].Position.x + ViewportWidth * 0.5f, 0);
     }
     
+    protected override int FindClosestItemToCenter()
+    {
+        var index = -1;
+        var closestDistance = float.MaxValue;
+        var contentCenter = -Content.anchoredPosition.x + ViewportWidth * 0.5f;
+        for (var i = trailIndex; i <= headIndex; i++)
+        {
+            var distance = Mathf.Abs(ViewsData[i].Position.x - contentCenter);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                index = i;
+            }
+        }
+
+        return index;
+    }
+
     protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => contentDeltaPosition.x < 0;
 
     protected override bool IsFastScrolling(in Vector2 deltaPosition) =>

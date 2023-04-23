@@ -8,7 +8,7 @@ public abstract class PoolableScroll : MonoBehaviour
     [SerializeField]
     protected ScrollRect scrollRect;
 
-    private readonly LinkedList<ElementView> activeElements = new();
+    protected readonly LinkedList<ElementView> activeElements = new();
     private readonly Dictionary<string, ScrollElementsPool> elementPools = new();
 
     protected ElementViewData[] ViewsData;
@@ -17,8 +17,8 @@ public abstract class PoolableScroll : MonoBehaviour
     protected float ViewportHeight;
     protected float ViewportWidth;
 
-    private int headIndex;
-    private int trailIndex;
+    protected int headIndex;
+    protected int trailIndex;
 
     private IElementData[] itemsData;
     private Vector2? previousContentPosition;
@@ -56,6 +56,21 @@ public abstract class PoolableScroll : MonoBehaviour
         CreateInitialElements(itemsData, Content.anchoredPosition);
     }
 
+    public void ScrollToNext()
+    {
+        var index = FindClosestItemToCenter();
+        var nextIndex = Mathf.Clamp(index + 1, 0, ViewsData.Length - 1);
+        ScrollToItem(nextIndex);
+    }
+
+    public void ScrollToPrevious()
+    {
+        var index = FindClosestItemToCenter();
+        var nextIndex = Mathf.Clamp(index - 1, 0, ViewsData.Length - 1);
+        ScrollToItem(nextIndex);
+    }
+
+    public abstract void ScrollToItem(int itemIndex);
     protected abstract void InitViewsData(IElementData[] dataElements, out Vector2 contentSize);
     protected abstract bool IsMovingForward(in Vector2 contentDeltaPosition);
     protected abstract bool IsFastScrolling(in Vector2 contentDeltaPosition);
@@ -64,6 +79,7 @@ public abstract class PoolableScroll : MonoBehaviour
     protected abstract bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 contentAnchoredPosition);
     protected abstract bool IsPartiallyVisibleInViewport(in int itemIndex, in Vector2 contentAnchoredPosition);
     protected abstract int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition);
+    protected abstract int FindClosestItemToCenter();
 
     protected Vector2 GetElementSize(IElementData data)
     {
@@ -343,6 +359,4 @@ public abstract class PoolableScroll : MonoBehaviour
             }
         }
     }
-
-    public abstract void ScrollToItem(int itemIndex);
 }
