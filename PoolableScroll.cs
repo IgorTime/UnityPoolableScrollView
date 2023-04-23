@@ -14,16 +14,16 @@ public abstract class PoolableScroll : MonoBehaviour
     [SerializeField]
     protected int trailIndex;
 
-    protected readonly LinkedList<ElementView> activeElements = new();
-    protected readonly Dictionary<string, ScrollElementsPool> elementPools = new();
-    protected IElementData[] itemsData;
+    private readonly LinkedList<ElementView> activeElements = new();
+    private readonly Dictionary<string, ScrollElementsPool> elementPools = new();
     protected ElementViewData[] viewsData;
-    protected Vector2? previousContentPosition;
-    protected int activeItemsCount;
     protected Rect contentRect;
-    protected RectTransform content;
     protected float viewportHeight;
     protected float viewportWidth;
+    private IElementData[] itemsData;
+    private Vector2? previousContentPosition;
+    private int activeItemsCount;
+    private RectTransform content;
 
     private ElementView First => activeElements?.First?.Value;
     private ElementView Last => activeElements?.Last?.Value;
@@ -57,16 +57,14 @@ public abstract class PoolableScroll : MonoBehaviour
         CreateInitialElements(itemsData, content.anchoredPosition);
     }
 
-    protected bool IsScrolledToTheEnd() => headIndex == itemsData.Length - 1;
-    protected bool IsScrolledToTheStart() => trailIndex == 0;
-
     protected abstract void InitViewsData(IElementData[] dataElements, out Vector2 contentSize);
     protected abstract bool IsMovingForward(in Vector2 contentDeltaPosition);
     protected abstract bool IsFastScrolling(in Vector2 contentDeltaPosition);
     protected abstract Vector2 CalculateItemPositionInContent(in int itemIndex);
     protected abstract bool IsOutOfViewportInForwardDirection(int itemIndex, in Vector2 anchoredPosition);
     protected abstract bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 anchoredPosition);
-
+    protected abstract bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 anchoredPosition);
+    protected abstract int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition);
 
     protected Vector2 GetElementSize(IElementData data)
     {
@@ -74,7 +72,10 @@ public abstract class PoolableScroll : MonoBehaviour
         return prefab.Size;
     }
 
-    protected ElementView CreateElement(IElementData data, Vector2 position, int index)
+    private bool IsScrolledToTheEnd() => headIndex == itemsData.Length - 1;
+    private bool IsScrolledToTheStart() => trailIndex == 0;
+
+    private ElementView CreateElement(IElementData data, Vector2 position, int index)
     {
         var elementView = GetElementView(data);
         elementView.Initialize(data, index);
@@ -83,7 +84,7 @@ public abstract class PoolableScroll : MonoBehaviour
         return elementView;
     }
 
-    protected void ReleaseFirstElement()
+    private void ReleaseFirstElement()
     {
         headIndex--;
 
@@ -94,18 +95,20 @@ public abstract class PoolableScroll : MonoBehaviour
         }
     }
 
-    protected void ReleaseLastElement()
+    private void ReleaseLastElement()
     {
         trailIndex++;
 
-        if (activeItemsCount > 0)
+        if (activeItemsCount <= 0)
         {
-            ReleaseElement(Last);
-            activeElements.RemoveLast();
+            return;
         }
+
+        ReleaseElement(Last);
+        activeElements.RemoveLast();
     }
 
-    protected void ReleaseAllItems()
+    private void ReleaseAllItems()
     {
         while (activeElements.Count > 0)
         {
@@ -118,7 +121,7 @@ public abstract class PoolableScroll : MonoBehaviour
         activeItemsCount = 0;
     }
 
-    protected void CreateHeadItem(in int itemIndex)
+    private void CreateHeadItem(in int itemIndex)
     {
         var newElement = CreateElement(
             itemsData[itemIndex],
@@ -128,7 +131,7 @@ public abstract class PoolableScroll : MonoBehaviour
         activeElements.AddFirst(newElement);
     }
 
-    protected void CreateTrailItem(in int itemIndex)
+    private void CreateTrailItem(in int itemIndex)
     {
         var newElement = CreateElement(
             itemsData[itemIndex],
@@ -178,7 +181,7 @@ public abstract class PoolableScroll : MonoBehaviour
         {
         }
     }
-    
+
     private void ReinitAllItems(in Vector2 contentAnchoredPosition)
     {
         ReleaseAllItems();
@@ -199,7 +202,7 @@ public abstract class PoolableScroll : MonoBehaviour
         {
         }
     }
-    
+
     private bool TryRemoveHeadItem(in Vector2 anchoredPosition)
     {
         if (!IsOutOfViewportInForwardDirection(headIndex, anchoredPosition))
@@ -210,7 +213,7 @@ public abstract class PoolableScroll : MonoBehaviour
         ReleaseFirstElement();
         return true;
     }
-    
+
     private bool TryRemoveTrailItem(in Vector2 anchoredPosition)
     {
         if (!IsOutOfViewportInBackwardDirection(trailIndex, anchoredPosition))
@@ -245,7 +248,7 @@ public abstract class PoolableScroll : MonoBehaviour
         CreateNewHeadElement(anchoredPosition);
         return true;
     }
-    
+
     private void HandleMovementForward(in Vector2 contentAnchoredPosition)
     {
         if (IsScrolledToTheEnd())
@@ -308,7 +311,7 @@ public abstract class PoolableScroll : MonoBehaviour
         pool.Release(element);
         activeItemsCount--;
     }
-    
+
     private void CreateNewHeadElement(in Vector2 anchoredPosition)
     {
         headIndex++;
@@ -328,7 +331,7 @@ public abstract class PoolableScroll : MonoBehaviour
             CreateTrailItem(trailIndex);
         }
     }
-    
+
     private void CreateInitialElements(IElementData[] elementsData, in Vector2 anchoredPosition)
     {
         headIndex = -1;
@@ -341,7 +344,4 @@ public abstract class PoolableScroll : MonoBehaviour
             }
         }
     }
-
-    protected abstract int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition);
-    protected abstract bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 anchoredPosition);
 }
