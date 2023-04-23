@@ -62,7 +62,7 @@ public class HorizontalScroll : PoolableScroll
             }
 
             var middleElement = ViewsData[middleIndex];
-            if (middleElement.Position.x > contentAnchoredPosition.x)
+            if (middleElement.Position.x > -contentAnchoredPosition.x)
             {
                 endIndex = middleIndex - 1;
             }
