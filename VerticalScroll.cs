@@ -7,14 +7,9 @@ public class VerticalScroll : PoolableScroll
 {
     protected override void CreateInitialElements(IElementData[] elementsData, in Vector2 anchoredPosition)
     {
+        headIndex = -1;
         for (var i = 0; i < elementsData.Length; i++)
         {
-            if (i == 0)
-            {
-                CreateHeadItem(0);
-                continue;
-            }
-
             CreateNewHeadElement(anchoredPosition);
             if (IsBelowOfViewport(headIndex, anchoredPosition))
             {
