@@ -33,7 +33,7 @@ public class HorizontalScroll : PoolableScroll
         ViewsData[itemIndex].Max.x < anchoredPosition.x; // IsOnTheLeftOfViewport
 
     protected override Vector2 CalculateItemPositionInContent(in int itemIndex) =>
-        new(ContentRect.width * 0.5f - ViewsData[itemIndex].Position.x, 0);
+        new(-ContentRect.width * 0.5f + ViewsData[itemIndex].Position.x, 0);
 
     protected override bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 anchoredPosition) =>
         !IsOutOfViewportInBackwardDirection(elementIndex, anchoredPosition) &&
