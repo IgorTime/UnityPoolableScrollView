@@ -74,15 +74,21 @@ public abstract class PoolableScroll : MonoBehaviour
             return;
         }
 
-        HandleMovement(contentDeltaPosition, contentAnchoredPosition);
+        if (IsMovingForward(contentDeltaPosition))
+        {
+            HandleMoveForward(contentAnchoredPosition);
+        }
+        else
+        {
+            HandleMoveBackward(contentAnchoredPosition);
+        }
     }
 
-    protected abstract void HandleMovement(
-        in Vector2 contentDeltaPosition,
-        in Vector2 contentAnchoredPosition);
-
+    protected abstract void SetContentSize(IElementData[] dataElements);
+    protected abstract void HandleMoveBackward(in Vector2 contentAnchoredPosition);
+    protected abstract void HandleMoveForward(in Vector2 contentAnchoredPosition);
+    protected abstract bool IsMovingForward(in Vector2 contentDeltaPosition);
     protected abstract bool IsFastScrolling(in Vector2 contentDeltaPosition);
-
     protected abstract void ReinitAllItems(in Vector2 contentAnchoredPosition);
 
     private Vector2 GetContentDeltaPosition(Vector2 contentPosition)
@@ -99,7 +105,6 @@ public abstract class PoolableScroll : MonoBehaviour
         IElementData[] dataElements,
         in Vector2 contentAnchoredPosition);
 
-    protected abstract void SetContentSize(IElementData[] dataElements);
 
     private void OnValidate()
     {

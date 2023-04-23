@@ -29,20 +29,7 @@ public class VerticalScroll : PoolableScroll
         content.sizeDelta = new Vector2(content.sizeDelta.x, height);
     }
 
-    protected override void HandleMovement(
-        in Vector2 contentDeltaPosition,
-        in Vector2 contentAnchoredPosition)
-    {
-        switch (contentDeltaPosition.y)
-        {
-            case < 0:
-                HandleMoveDown(contentAnchoredPosition);
-                break;
-            case > 0:
-                HandleMoveUp(contentAnchoredPosition);
-                break;
-        }
-    }
+    protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => contentDeltaPosition.y > 0;
 
     protected override bool IsFastScrolling(in Vector2 deltaPosition) =>
         Mathf.Abs(deltaPosition.y) > viewportHeight * 2;
@@ -60,6 +47,38 @@ public class VerticalScroll : PoolableScroll
             index));
 
         while (TryCreateNewTrailItem(contentAnchoredPosition))
+        {
+        }
+
+        while (TryCreateNewHeadItem(contentAnchoredPosition))
+        {
+        }
+    }
+
+    protected override void HandleMoveBackward(in Vector2 contentAnchoredPosition)
+    {
+        if (IsScrolledToTheStart())
+        {
+            return;
+        }
+
+        while (TryRemoveHeadItem(contentAnchoredPosition))
+        {
+        }
+
+        while (TryCreateNewTrailItem(contentAnchoredPosition))
+        {
+        }
+    }
+
+    protected override void HandleMoveForward(in Vector2 contentAnchoredPosition)
+    {
+        if (IsScrolledToTheEnd())
+        {
+            return;
+        }
+
+        while (TryRemoveTrailItem(contentAnchoredPosition))
         {
         }
 
@@ -91,39 +110,6 @@ public class VerticalScroll : PoolableScroll
         }
 
         return contentHeight;
-    }
-    
-
-    private void HandleMoveDown(Vector2 contentAnchoredPosition)
-    {
-        if (IsScrolledToTheStart())
-        {
-            return;
-        }
-
-        while (TryRemoveHeadItem(contentAnchoredPosition))
-        {
-        }
-
-        while (TryCreateNewTrailItem(contentAnchoredPosition))
-        {
-        }
-    }
-
-    private void HandleMoveUp(Vector2 contentAnchoredPosition)
-    {
-        if (IsScrolledToTheEnd())
-        {
-            return;
-        }
-
-        while (TryRemoveTrailItem(contentAnchoredPosition))
-        {
-        }
-
-        while (TryCreateNewHeadItem(contentAnchoredPosition))
-        {
-        }
     }
 
     private bool TryRemoveHeadItem(in Vector2 anchoredPosition)
