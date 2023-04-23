@@ -4,7 +4,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(ScrollRect))]
 public class HorizontalScroll : PoolableScroll
 {
-    protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => contentDeltaPosition.x > 0;
+    protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => contentDeltaPosition.x < 0;
 
     protected override bool IsFastScrolling(in Vector2 deltaPosition) =>
         Mathf.Abs(deltaPosition.x) > ViewportWidth * 2;
@@ -27,10 +27,10 @@ public class HorizontalScroll : PoolableScroll
     }
 
     protected override bool IsOutOfViewportInForwardDirection(int itemIndex, in Vector2 anchoredPosition) =>
-        ViewsData[itemIndex].Min.x > anchoredPosition.x + ViewportWidth; // IsOnTheRightOfViewport
+        ViewsData[itemIndex].Min.x > -anchoredPosition.x + ViewportWidth; // IsOnTheRightOfViewport
 
     protected override bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 anchoredPosition) =>
-        ViewsData[itemIndex].Max.x < anchoredPosition.x; // IsOnTheLeftOfViewport
+        ViewsData[itemIndex].Max.x < -anchoredPosition.x; // IsOnTheLeftOfViewport
 
     protected override Vector2 CalculateItemPositionInContent(in int itemIndex) =>
         new(-ContentRect.width * 0.5f + ViewsData[itemIndex].Position.x, 0);
