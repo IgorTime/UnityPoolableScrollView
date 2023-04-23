@@ -16,10 +16,12 @@ public abstract class PoolableScroll : MonoBehaviour
 
     private readonly LinkedList<ElementView> activeElements = new();
     private readonly Dictionary<string, ScrollElementsPool> elementPools = new();
-    protected ElementViewData[] viewsData;
-    protected Rect contentRect;
-    protected float viewportHeight;
-    protected float viewportWidth;
+    
+    protected ElementViewData[] ViewsData;
+    protected Rect ContentRect;
+    protected float ViewportHeight;
+    protected float ViewportWidth;
+    
     private IElementData[] itemsData;
     private Vector2? previousContentPosition;
     private int activeItemsCount;
@@ -33,8 +35,8 @@ public abstract class PoolableScroll : MonoBehaviour
         content = scrollRect.content;
 
         var viewportRect = scrollRect.viewport.rect;
-        viewportHeight = viewportRect.height;
-        viewportWidth = viewportRect.width;
+        ViewportHeight = viewportRect.height;
+        ViewportWidth = viewportRect.width;
     }
 
     private void OnEnable()
@@ -52,7 +54,7 @@ public abstract class PoolableScroll : MonoBehaviour
         this.itemsData = itemsData;
         InitViewsData(this.itemsData, out var contentSize);
         content.sizeDelta = contentSize;
-        contentRect = scrollRect.content.rect;
+        ContentRect = scrollRect.content.rect;
         previousContentPosition = content.anchoredPosition;
         CreateInitialElements(itemsData, content.anchoredPosition);
     }
