@@ -6,7 +6,7 @@ public class HorizontalScroll : PoolableScroll
 {
     public override void ScrollToItem(int itemIndex)
     {
-        Content.anchoredPosition = new Vector2(-ViewsData[itemIndex].Position.x - ViewportWidth * 0.5f, 0);
+        Content.anchoredPosition = new Vector2(-ViewsData[itemIndex].Position.x + ViewportWidth * 0.5f, 0);
     }
     
     protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => contentDeltaPosition.x < 0;
@@ -40,9 +40,9 @@ public class HorizontalScroll : PoolableScroll
     protected override Vector2 CalculateItemPositionInContent(in int itemIndex) =>
         new(-ContentRect.width * 0.5f + ViewsData[itemIndex].Position.x, 0);
 
-    protected override bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 contentAnchoredPosition) =>
-        !IsOutOfViewportInBackwardDirection(elementIndex, contentAnchoredPosition) &&
-        !IsOutOfViewportInForwardDirection(elementIndex, contentAnchoredPosition);
+    protected override bool IsPartiallyVisibleInViewport(in int itemIndex, in Vector2 contentAnchoredPosition) =>
+        !IsOutOfViewportInBackwardDirection(itemIndex, contentAnchoredPosition) &&
+        !IsOutOfViewportInForwardDirection(itemIndex, contentAnchoredPosition);
 
     protected override int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition)
     {
@@ -50,7 +50,7 @@ public class HorizontalScroll : PoolableScroll
         var endIndex = ViewsData.Length - 1;
         while (true)
         {
-            if (startIndex == endIndex)
+            if (startIndex == endIndex || endIndex < 0)
             {
                 return -1;
             }

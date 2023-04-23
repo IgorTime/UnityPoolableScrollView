@@ -40,9 +40,9 @@ public class VerticalScroll : PoolableScroll
     protected override Vector2 CalculateItemPositionInContent(in int itemIndex) =>
         new(0, ContentRect.height * 0.5f - ViewsData[itemIndex].Position.y);
 
-    protected override bool IsPartiallyVisibleInViewport(in int elementIndex, in Vector2 contentAnchoredPosition) =>
-        !IsOutOfViewportInBackwardDirection(elementIndex, contentAnchoredPosition) &&
-        !IsOutOfViewportInForwardDirection(elementIndex, contentAnchoredPosition);
+    protected override bool IsPartiallyVisibleInViewport(in int itemIndex, in Vector2 contentAnchoredPosition) =>
+        !IsOutOfViewportInBackwardDirection(itemIndex, contentAnchoredPosition) &&
+        !IsOutOfViewportInForwardDirection(itemIndex, contentAnchoredPosition);
 
     protected override int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition)
     {
