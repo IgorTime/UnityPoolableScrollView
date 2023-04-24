@@ -8,9 +8,6 @@ namespace IgorTime.PoolableScrollView
         [SerializeField]
         private ElementView elementView;
 
-        [SerializeField]
-        private float t;
-
         private void OnEnable()
         {
             elementView.onRelativePositionChanged.AddListener(OnRelativePositionChanged);
@@ -25,7 +22,6 @@ namespace IgorTime.PoolableScrollView
 
         private void OnRelativePositionChanged(float relativePosition)
         {
-            t = relativePosition;
             Animate(relativePosition);
         }
 

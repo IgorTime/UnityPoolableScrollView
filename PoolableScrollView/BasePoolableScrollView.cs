@@ -91,6 +91,7 @@ namespace IgorTime.PoolableScrollView
             ContentRect = scrollRect.content.rect;
             previousContentPosition = Content.anchoredPosition;
             CreateInitialElements(itemsData, Content.anchoredPosition);
+            UpdateItemsRelativePosition();
         }
 
         public void ScrollToItem(int itemIndex)
