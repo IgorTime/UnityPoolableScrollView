@@ -4,7 +4,8 @@ using UnityEngine.UI;
 namespace IgorTime.PoolableScrollView
 {
     [RequireComponent(typeof(ScrollRect))]
-    public class HorizontalScrollView : PoolableScrollView
+    [AddComponentMenu("IgorTime/PoolableScrollView/VerticalScrollView")]
+    public class HorizontalScrollView : BasePoolableScrollView
     {
         protected override Vector2 GetAnchoredPositionOfContentForItem(int itemIndex) =>
             new(-ViewsData[itemIndex].Position.x + ViewportWidth * 0.5f, 0);

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace IgorTime.PoolableScrollView
 {
     [RequireComponent(typeof(ScrollRect))]
-    public abstract class PoolableScrollView : MonoBehaviour
+    public abstract class BasePoolableScrollView : MonoBehaviour
     {
         [SerializeField]
         protected ScrollRect scrollRect;
@@ -94,14 +94,30 @@ namespace IgorTime.PoolableScrollView
         {
             var index = FindClosestItemToCenter();
             var nextIndex = Mathf.Clamp(index + 1, 0, ViewsData.Length - 1);
-            ScrollToItem(nextIndex, duration, easingCurve);
+
+            if (duration > 0)
+            {
+                ScrollToItem(nextIndex, duration, easingCurve);
+            }
+            else
+            {
+                ScrollToItem(nextIndex);
+            }
         }
 
         public void ScrollToPrevious(float duration, AnimationCurve easingCurve = null)
         {
             var index = FindClosestItemToCenter();
-            var nextIndex = Mathf.Clamp(index - 1, 0, ViewsData.Length - 1);
-            ScrollToItem(nextIndex, duration, easingCurve);
+            var previousIndex = Mathf.Clamp(index - 1, 0, ViewsData.Length - 1);
+            
+            if (duration > 0)
+            {
+                ScrollToItem(previousIndex, duration, easingCurve);
+            }
+            else
+            {
+                ScrollToItem(previousIndex);
+            }
         }
 
         protected abstract void InitViewsData(IElementData[] dataElements, out Vector2 contentSize);
@@ -122,8 +138,8 @@ namespace IgorTime.PoolableScrollView
         }
 
         private IEnumerator ScrollCoroutine(
-            Vector2 targetPosition, 
-            float duration, 
+            Vector2 targetPosition,
+            float duration,
             AnimationCurve easingCurve = null)
         {
             var elapsedTime = 0f;
@@ -131,7 +147,7 @@ namespace IgorTime.PoolableScrollView
             while (elapsedTime < duration)
             {
                 var t = elapsedTime / duration;
-                if(easingCurve != null)
+                if (easingCurve != null)
                 {
                     t = easingCurve.Evaluate(t);
                 }
@@ -140,7 +156,7 @@ namespace IgorTime.PoolableScrollView
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
-        
+
             Content.anchoredPosition = targetPosition;
         }
 

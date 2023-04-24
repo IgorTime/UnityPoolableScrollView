@@ -6,12 +6,12 @@ using UnityEngine.Serialization;
 
 namespace IgorTime.Samples.Sample_1
 {
-    [RequireComponent(typeof(PoolableScrollView.PoolableScrollView))]
+    [RequireComponent(typeof(BasePoolableScrollView))]
     public class ScrollInitializer : MonoBehaviour
     {
-        [FormerlySerializedAs("verticalScroll")]
+        [FormerlySerializedAs("verticalScrollView")]
         [SerializeField]
-        private PoolableScrollView.PoolableScrollView verticalScrollView;
+        private BasePoolableScrollView scrollView;
 
         [SerializeField]
         private int itemsCount;
@@ -22,13 +22,6 @@ namespace IgorTime.Samples.Sample_1
         [SerializeField]
         private int itemIndex;
 
-        [SerializeField]
-        private float animationDuration = 0.5f;
-    
-        [SerializeField]
-        private AnimationCurve easeInOut = AnimationCurve.EaseInOut(0, 0, 1, 1);
-
-    
         public void Start()
         {
             var dataList = new List<IElementData>();
@@ -41,34 +34,15 @@ namespace IgorTime.Samples.Sample_1
                 dataList.Add(item);
             }
 
-            verticalScrollView.Initialize(dataList.ToArray());
+            scrollView.Initialize(dataList.ToArray());
         }
 
         [ContextMenu(nameof(ScrollTo))]
         public void ScrollTo()
         {
-            verticalScrollView.ScrollToItem(itemIndex);
-        }
-    
-        [ContextMenu(nameof(ScrollToAnimated))]
-        public void ScrollToAnimated()
-        {
-            verticalScrollView.ScrollToItem(itemIndex, animationDuration, easeInOut);
+            scrollView.ScrollToItem(itemIndex);
         }
 
-        [ContextMenu(nameof(Next))]
-        public void Next()
-        {
-            verticalScrollView.ScrollToNext(animationDuration, easeInOut);
-        }
-    
-        [ContextMenu(nameof(Previous))]
-
-        public void Previous()
-        {
-            verticalScrollView.ScrollToPrevious(animationDuration, easeInOut);
-        }
-    
         private T GetRandom<T>(T[] array) => array[Random.Range(0, array.Length)];
     }
 }
