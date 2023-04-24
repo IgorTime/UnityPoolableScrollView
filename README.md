@@ -1,6 +1,7 @@
 # PoolableScrollView for Unity based on UGUI
 
 ## Features:
+- Vertical and Horizontal scrolls
 - Unlimited amount of items
 - Supports different data types
 - Supports different data views with different sizes
