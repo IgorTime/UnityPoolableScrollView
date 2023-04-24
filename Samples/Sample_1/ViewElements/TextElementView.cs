@@ -1,0 +1,23 @@
+﻿using TMPro;
+using UnityEngine;
+
+public class TextElementView : ElementView
+{
+    [SerializeField]
+    private TextMeshProUGUI text;
+    
+    [SerializeField]
+    private CanvasGroup canvasGroup;
+
+    protected override void UpdateContent(IElementData data)
+    {
+        var textData = (TextData) data;
+        text.text = textData.Text;
+    }
+
+    public override void SetVisibility(bool isVisible)
+    {
+        canvasGroup.alpha = isVisible ? 1 : 0;
+        // text.enabled = isVisible;
+    }
+}
