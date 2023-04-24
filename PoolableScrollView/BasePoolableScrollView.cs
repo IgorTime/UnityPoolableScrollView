@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,6 +32,8 @@ namespace IgorTime.PoolableScrollView
         private int activeItemsCount;
         private Coroutine scrollCoroutine;
 
+        public bool IsAnimated => scrollCoroutine != null;
+        
         private ElementView Head
         {
             get
@@ -96,17 +99,21 @@ namespace IgorTime.PoolableScrollView
             Content.anchoredPosition = GetAnchoredPositionOfContentForItem(itemIndex);
         }
 
-        public void ScrollToItem(int itemIndex, float duration, AnimationCurve easingCurve = null)
+        public void ScrollToItem(
+            int itemIndex, 
+            float duration,
+            AnimationCurve easingCurve = null,
+            Action onCompleted = null)
         {
-            scrollRect.velocity = Vector2.zero;
-
             if (scrollCoroutine != null)
             {
-                StopCoroutine(scrollCoroutine);
+                return;
             }
 
+            scrollRect.velocity = Vector2.zero;
+
             var targetPosition = GetAnchoredPositionOfContentForItem(itemIndex);
-            scrollCoroutine = StartCoroutine(ScrollCoroutine(targetPosition, duration, easingCurve));
+            scrollCoroutine = StartCoroutine(ScrollCoroutine(targetPosition, duration, easingCurve, onCompleted));
         }
 
         public void ScrollToNext()
@@ -123,14 +130,17 @@ namespace IgorTime.PoolableScrollView
             ScrollToItem(nextIndex);
         }
 
-        public void ScrollToNext(float duration, AnimationCurve easingCurve = null)
+        public void ScrollToNext(
+            float duration, 
+            AnimationCurve easingCurve = null, 
+            Action onCompleted = null)
         {
             var index = FindClosestItemToCenter();
             var nextIndex = Mathf.Clamp(index + 1, 0, ViewsData.Length - 1);
 
             if (duration > 0)
             {
-                ScrollToItem(nextIndex, duration, easingCurve);
+                ScrollToItem(nextIndex, duration, easingCurve, onCompleted);
             }
             else
             {
@@ -138,14 +148,17 @@ namespace IgorTime.PoolableScrollView
             }
         }
 
-        public void ScrollToPrevious(float duration, AnimationCurve easingCurve = null)
+        public void ScrollToPrevious(
+            float duration, 
+            AnimationCurve easingCurve = null, 
+            Action onCompleted = null)
         {
             var index = FindClosestItemToCenter();
             var previousIndex = Mathf.Clamp(index - 1, 0, ViewsData.Length - 1);
 
             if (duration > 0)
             {
-                ScrollToItem(previousIndex, duration, easingCurve);
+                ScrollToItem(previousIndex, duration, easingCurve, onCompleted);
             }
             else
             {
@@ -161,7 +174,7 @@ namespace IgorTime.PoolableScrollView
         protected abstract bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 contentAnchoredPosition);
         protected abstract bool IsPartiallyVisibleInViewport(in int itemIndex, in Vector2 contentAnchoredPosition);
         protected abstract int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition);
-        protected abstract int FindClosestItemToCenter();
+        public abstract int FindClosestItemToCenter();
         protected abstract Vector2 GetAnchoredPositionOfContentForItem(int itemIndex);
 
         protected Vector2 GetElementSize(IElementData data)
@@ -173,7 +186,8 @@ namespace IgorTime.PoolableScrollView
         private IEnumerator ScrollCoroutine(
             Vector2 targetPosition,
             float duration,
-            AnimationCurve easingCurve = null)
+            AnimationCurve easingCurve = null,
+            Action onCompleted = null)
         {
             var elapsedTime = 0f;
             var startPosition = Content.anchoredPosition;
@@ -191,6 +205,10 @@ namespace IgorTime.PoolableScrollView
             }
 
             Content.anchoredPosition = targetPosition;
+
+            yield return null;
+            scrollCoroutine = null;
+            onCompleted?.Invoke();
         }
 
         private bool IsScrolledToTheEnd() => HeadIndex == itemsData.Length - 1;
@@ -275,6 +293,14 @@ namespace IgorTime.PoolableScrollView
                 return;
             }
 
+            HandleMovement(contentDeltaPosition, contentAnchoredPosition);
+            UpdateItemsRelativePosition();
+        }
+
+        private void HandleMovement(
+            in Vector2 contentDeltaPosition, 
+            in Vector2 contentAnchoredPosition)
+        {
             if (IsMovingForward(contentDeltaPosition))
             {
                 HandleMovementForward(contentAnchoredPosition);
@@ -283,8 +309,6 @@ namespace IgorTime.PoolableScrollView
             {
                 HandleMovementBackward(contentAnchoredPosition);
             }
-            
-            UpdateItemsRelativePosition();
         }
 
         protected abstract void UpdateItemsRelativePosition();

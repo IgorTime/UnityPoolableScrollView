@@ -11,7 +11,7 @@ namespace IgorTime.PoolableScrollView
         protected override Vector2 GetAnchoredPositionOfContentForItem(int itemIndex) =>
             new(-ViewsData[itemIndex].Position.x + ViewportWidth * 0.5f, 0);
 
-        protected override int FindClosestItemToCenter()
+        public override int FindClosestItemToCenter()
         {
             var index = -1;
             var closestDistance = float.MaxValue;
