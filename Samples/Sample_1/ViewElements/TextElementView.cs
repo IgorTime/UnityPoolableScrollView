@@ -1,23 +1,28 @@
-﻿using TMPro;
+﻿using IgorTime.PoolableScrollView;
+using IgorTime.Samples.Sample_1.ElementData;
+using TMPro;
 using UnityEngine;
 
-public class TextElementView : ElementView
+namespace IgorTime.Samples.Sample_1.ViewElements
 {
-    [SerializeField]
-    private TextMeshProUGUI text;
+    public class TextElementView : ElementView
+    {
+        [SerializeField]
+        private TextMeshProUGUI text;
     
-    [SerializeField]
-    private CanvasGroup canvasGroup;
+        [SerializeField]
+        private CanvasGroup canvasGroup;
 
-    protected override void UpdateContent(IElementData data)
-    {
-        var textData = (TextData) data;
-        text.text = textData.Text;
-    }
+        protected override void UpdateContent(IElementData data)
+        {
+            var textData = (TextData) data;
+            text.text = textData.Text;
+        }
 
-    public override void SetVisibility(bool isVisible)
-    {
-        canvasGroup.alpha = isVisible ? 1 : 0;
-        // text.enabled = isVisible;
+        public override void SetVisibility(bool isVisible)
+        {
+            canvasGroup.alpha = isVisible ? 1 : 0;
+            // text.enabled = isVisible;
+        }
     }
 }

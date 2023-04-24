@@ -1,19 +1,24 @@
-﻿using UnityEngine;
+﻿using IgorTime.PoolableScrollView;
+using IgorTime.Samples.Sample_1.ElementData;
+using UnityEngine;
 using UnityEngine.UI;
 
-public class ImageElementView : ElementView
+namespace IgorTime.Samples.Sample_1.ViewElements
 {
-    [SerializeField]
-    private Image image;
-
-    protected override void UpdateContent(IElementData data)
+    public class ImageElementView : ElementView
     {
-        var spriteData = (SpriteData) data;
-        image.sprite = spriteData.Sprite;
-    }
+        [SerializeField]
+        private Image image;
 
-    public override void SetVisibility(bool isVisible)
-    {
-        image.enabled = isVisible;
+        protected override void UpdateContent(IElementData data)
+        {
+            var spriteData = (SpriteData) data;
+            image.sprite = spriteData.Sprite;
+        }
+
+        public override void SetVisibility(bool isVisible)
+        {
+            image.enabled = isVisible;
+        }
     }
 }

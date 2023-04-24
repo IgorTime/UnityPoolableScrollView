@@ -1,7 +1,11 @@
-﻿using UnityEngine;
+﻿using IgorTime.PoolableScrollView;
+using UnityEngine;
 
-public class SpriteData : IElementData
+namespace IgorTime.Samples.Sample_1.ElementData
 {
-    public Sprite Sprite { get; set; }
-    public string PrefabPath => "ImageElement";
+    public class SpriteData : IElementData
+    {
+        public Sprite Sprite { get; set; }
+        public string PrefabPath => "ImageElement";
+    }
 }
