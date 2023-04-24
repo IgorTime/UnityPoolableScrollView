@@ -69,5 +69,17 @@ namespace IgorTime.PoolableScrollView
                 ViewsData,
                 contentAnchoredPosition.y,
                 ViewportHeight);
+        
+        protected override void UpdateItemsRelativePosition()
+        {
+            var viewportPositionY = scrollRect.viewport.position.y;
+            var viewportHalfHeight = scrollRect.viewport.rect.height * 0.5f;
+            foreach (var activeElement in ActiveElements.Values)
+            {
+                var d = Mathf.Abs(activeElement.RectTransform.position.y - viewportPositionY);
+                var t = Mathf.Clamp01(1f - d / viewportHalfHeight);
+                activeElement.UpdateRelativePosition(t);
+            }
+        }
     }
 }

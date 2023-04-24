@@ -15,7 +15,7 @@ namespace IgorTime.PoolableScrollView
         [SerializeField]
         protected ViewItemProvider itemViewProvider;
 
-        private readonly Dictionary<int, ElementView> activeElements = new();
+        protected readonly Dictionary<int, ElementView> ActiveElements = new();
 
         protected ElementViewData[] ViewsData;
         protected Rect ContentRect;
@@ -40,7 +40,7 @@ namespace IgorTime.PoolableScrollView
                     return null;
                 }
 
-                return activeElements.TryGetValue(HeadIndex, out var element)
+                return ActiveElements.TryGetValue(HeadIndex, out var element)
                     ? element
                     : null;
             }
@@ -55,7 +55,7 @@ namespace IgorTime.PoolableScrollView
                     return null;
                 }
 
-                return activeElements.TryGetValue(TrailIndex, out var element)
+                return ActiveElements.TryGetValue(TrailIndex, out var element)
                     ? element
                     : null;
             }
@@ -210,7 +210,7 @@ namespace IgorTime.PoolableScrollView
             if (activeItemsCount > 0)
             {
                 ReleaseElement(Head);
-                activeElements.Remove(HeadIndex);
+                ActiveElements.Remove(HeadIndex);
             }
             
             HeadIndex--;
@@ -221,7 +221,7 @@ namespace IgorTime.PoolableScrollView
             if (activeItemsCount > 0)
             {
                 ReleaseElement(Trail);
-                activeElements.Remove(TrailIndex);
+                ActiveElements.Remove(TrailIndex);
             }
 
             TrailIndex++;
@@ -229,7 +229,7 @@ namespace IgorTime.PoolableScrollView
 
         private void ReleaseAllItems()
         {
-            foreach (var active in activeElements.Values)
+            foreach (var active in ActiveElements.Values)
             {
                 ReleaseElement(active);
             }
@@ -237,7 +237,7 @@ namespace IgorTime.PoolableScrollView
             HeadIndex = 0;
             TrailIndex = 0;
             activeItemsCount = 0;
-            activeElements.Clear();
+            ActiveElements.Clear();
         }
 
         private void CreateHeadItem(in int itemIndex)
@@ -247,7 +247,7 @@ namespace IgorTime.PoolableScrollView
                 CalculateItemPositionInContent(itemIndex),
                 itemIndex);
 
-            activeElements[itemIndex] = newElement;
+            ActiveElements[itemIndex] = newElement;
         }
 
         private void CreateTrailItem(in int itemIndex)
@@ -257,7 +257,7 @@ namespace IgorTime.PoolableScrollView
                 CalculateItemPositionInContent(itemIndex),
                 itemIndex);
 
-            activeElements[itemIndex] = newElement;
+            ActiveElements[itemIndex] = newElement;
         }
 
         private void UpdateScrollItems(Vector2 contentPosition)
@@ -287,17 +287,7 @@ namespace IgorTime.PoolableScrollView
             UpdateItemsRelativePosition();
         }
 
-        private void UpdateItemsRelativePosition()
-        {
-            var viewportPositionY = scrollRect.viewport.position.y;
-            var viewportHalfHeight = scrollRect.viewport.rect.height * 0.5f;
-            foreach (var activeElement in activeElements.Values)
-            {
-                var d = Mathf.Abs(activeElement.RectTransform.position.y - viewportPositionY);
-                var t = Mathf.Clamp01(1f - d / viewportHalfHeight);
-                activeElement.UpdateRelativePosition(t);
-            }
-        }
+        protected abstract void UpdateItemsRelativePosition();
 
         private void HandleMovementBackward(in Vector2 contentAnchoredPosition)
         {
@@ -322,7 +312,7 @@ namespace IgorTime.PoolableScrollView
             HeadIndex = index;
             TrailIndex = index;
 
-            activeElements[index] = CreateElement(
+            ActiveElements[index] = CreateElement(
                 itemsData[index],
                 CalculateItemPositionInContent(index),
                 index);
@@ -406,7 +396,7 @@ namespace IgorTime.PoolableScrollView
             return contentDeltaPosition.Value;
         }
 
-        private bool IsScrollEmpty() => activeElements.Count == 0 || itemsData.Length == 0;
+        private bool IsScrollEmpty() => ActiveElements.Count == 0 || itemsData.Length == 0;
 
         private void OnValidate()
         {
