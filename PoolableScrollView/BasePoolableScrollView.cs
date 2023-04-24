@@ -62,11 +62,14 @@ namespace IgorTime.PoolableScrollView
 
         public void ScrollToItem(int itemIndex)
         {
+            scrollRect.velocity = Vector2.zero;
             Content.anchoredPosition = GetAnchoredPositionOfContentForItem(itemIndex);
         }
 
         public void ScrollToItem(int itemIndex, float duration, AnimationCurve easingCurve = null)
         {
+            scrollRect.velocity = Vector2.zero;
+
             if (scrollCoroutine != null)
             {
                 StopCoroutine(scrollCoroutine);
@@ -109,7 +112,7 @@ namespace IgorTime.PoolableScrollView
         {
             var index = FindClosestItemToCenter();
             var previousIndex = Mathf.Clamp(index - 1, 0, ViewsData.Length - 1);
-            
+
             if (duration > 0)
             {
                 ScrollToItem(previousIndex, duration, easingCurve);
