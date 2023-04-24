@@ -15,7 +15,7 @@ namespace IgorTime.PoolableScrollView
         [SerializeField]
         protected ViewItemProvider itemViewProvider;
 
-        private readonly LinkedList<ElementView> activeElements = new();
+        private readonly Dictionary<int, ElementView> activeElements = new();
 
         protected ElementViewData[] ViewsData;
         protected Rect ContentRect;
@@ -31,8 +31,35 @@ namespace IgorTime.PoolableScrollView
         private int activeItemsCount;
         private Coroutine scrollCoroutine;
 
-        private ElementView First => activeElements?.First?.Value;
-        private ElementView Last => activeElements?.Last?.Value;
+        private ElementView Head
+        {
+            get
+            {
+                if (HeadIndex == -1)
+                {
+                    return null;
+                }
+
+                return activeElements.TryGetValue(HeadIndex, out var element)
+                    ? element
+                    : null;
+            }
+        }
+
+        private ElementView Trail
+        {
+            get
+            {
+                if (TrailIndex == -1)
+                {
+                    return null;
+                }
+
+                return activeElements.TryGetValue(TrailIndex, out var element)
+                    ? element
+                    : null;
+            }
+        }
 
         private void Awake()
         {
@@ -180,39 +207,37 @@ namespace IgorTime.PoolableScrollView
 
         private void ReleaseFirstElement()
         {
-            HeadIndex--;
-
             if (activeItemsCount > 0)
             {
-                ReleaseElement(First);
-                activeElements.RemoveFirst();
+                ReleaseElement(Head);
+                activeElements.Remove(HeadIndex);
             }
+            
+            HeadIndex--;
         }
 
         private void ReleaseLastElement()
         {
-            TrailIndex++;
-
-            if (activeItemsCount <= 0)
+            if (activeItemsCount > 0)
             {
-                return;
+                ReleaseElement(Trail);
+                activeElements.Remove(TrailIndex);
             }
 
-            ReleaseElement(Last);
-            activeElements.RemoveLast();
+            TrailIndex++;
         }
 
         private void ReleaseAllItems()
         {
-            while (activeElements.Count > 0)
+            foreach (var active in activeElements.Values)
             {
-                ReleaseElement(activeElements.First.Value);
-                activeElements.RemoveFirst();
+                ReleaseElement(active);
             }
 
             HeadIndex = 0;
             TrailIndex = 0;
             activeItemsCount = 0;
+            activeElements.Clear();
         }
 
         private void CreateHeadItem(in int itemIndex)
@@ -222,7 +247,7 @@ namespace IgorTime.PoolableScrollView
                 CalculateItemPositionInContent(itemIndex),
                 itemIndex);
 
-            activeElements.AddFirst(newElement);
+            activeElements[itemIndex] = newElement;
         }
 
         private void CreateTrailItem(in int itemIndex)
@@ -232,7 +257,7 @@ namespace IgorTime.PoolableScrollView
                 CalculateItemPositionInContent(itemIndex),
                 itemIndex);
 
-            activeElements.AddLast(newElement);
+            activeElements[itemIndex] = newElement;
         }
 
         private void UpdateScrollItems(Vector2 contentPosition)
@@ -283,10 +308,10 @@ namespace IgorTime.PoolableScrollView
             HeadIndex = index;
             TrailIndex = index;
 
-            activeElements.AddFirst(CreateElement(
+            activeElements[index] = CreateElement(
                 itemsData[index],
                 CalculateItemPositionInContent(index),
-                index));
+                index);
 
             while (TryCreateNewTrailItem(contentAnchoredPosition))
             {
