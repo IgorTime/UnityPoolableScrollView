@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+﻿using IgorTime.PoolableScrollView.Helpers;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace IgorTime.PoolableScrollView
 {
     [RequireComponent(typeof(ScrollRect))]
-    [AddComponentMenu("IgorTime/PoolableScrollView/VerticalScrollView")]
+    [AddComponentMenu(MenuConstants.ADD_COMPONENT_MENU_PATH + nameof(HorizontalScrollView))]
     public class HorizontalScrollView : BasePoolableScrollView
     {
         protected override Vector2 GetAnchoredPositionOfContentForItem(int itemIndex) =>
@@ -30,7 +31,8 @@ namespace IgorTime.PoolableScrollView
 
         protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => contentDeltaPosition.x < 0;
 
-        protected override bool IsFastScrolling(in Vector2 deltaPosition) => Mathf.Abs(deltaPosition.x) > ViewportWidth * 2;
+        protected override bool IsFastScrolling(in Vector2 deltaPosition) =>
+            Mathf.Abs(deltaPosition.x) > ViewportWidth * 2;
 
         protected override void InitViewsData(IElementData[] dataElements, out Vector2 contentSize)
         {

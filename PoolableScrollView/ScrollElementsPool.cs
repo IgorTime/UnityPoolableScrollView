@@ -9,7 +9,7 @@ namespace IgorTime.PoolableScrollView
         private readonly IObjectPool<ElementView> internalPool;
         private readonly ElementView prefab;
 
-        public ScrollElementsPool(string prefabPath, Transform parent)
+        public ScrollElementsPool(ElementView prefab, Transform parent)
         {
             this.parent = parent;
             internalPool = new ObjectPool<ElementView>(
@@ -18,16 +18,7 @@ namespace IgorTime.PoolableScrollView
                 ReleaseElement,
                 collectionCheck: false);
 
-            prefab = Resources.Load<ElementView>(prefabPath);
-        }
-
-        public ElementView Get() => internalPool.Get();
-
-        public ElementView Peek() => prefab;
-
-        public void Release(ElementView element)
-        {
-            internalPool.Release(element);
+            this.prefab = prefab;
         }
 
         private static void ReleaseElement(ElementView elementView)
@@ -38,6 +29,15 @@ namespace IgorTime.PoolableScrollView
         private static void GetElement(ElementView elementView)
         {
             elementView.SetVisibility(true);
+        }
+
+        public ElementView Get() => internalPool.Get();
+
+        public ElementView Peek() => prefab;
+
+        public void Release(ElementView element)
+        {
+            internalPool.Release(element);
         }
 
         private ElementView CreateElement() => Object.Instantiate(prefab, parent);

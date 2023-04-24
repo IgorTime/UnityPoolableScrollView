@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace IgorTime.PoolableScrollView
 {
     [RequireComponent(typeof(ScrollRect))]
-    [AddComponentMenu("IgorTime/PoolableScrollView/VerticalScrollView")]
+    [AddComponentMenu(MenuConstants.ADD_COMPONENT_MENU_PATH + nameof(VerticalScrollView))]
     public class VerticalScrollView : BasePoolableScrollView
     {
         protected override Vector2 GetAnchoredPositionOfContentForItem(int itemIndex) =>

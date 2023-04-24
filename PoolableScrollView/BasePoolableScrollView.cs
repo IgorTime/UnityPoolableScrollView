@@ -6,13 +6,16 @@ using UnityEngine.UI;
 namespace IgorTime.PoolableScrollView
 {
     [RequireComponent(typeof(ScrollRect))]
+    [RequireComponent(typeof(ViewItemProvider))]
     public abstract class BasePoolableScrollView : MonoBehaviour
     {
         [SerializeField]
         protected ScrollRect scrollRect;
 
+        [SerializeField]
+        protected ViewItemProvider itemViewProvider;
+
         private readonly LinkedList<ElementView> activeElements = new();
-        private readonly Dictionary<string, ScrollElementsPool> elementPools = new();
 
         protected ElementViewData[] ViewsData;
         protected Rect ContentRect;
@@ -136,7 +139,7 @@ namespace IgorTime.PoolableScrollView
 
         protected Vector2 GetElementSize(IElementData data)
         {
-            var prefab = PeekElementView(data);
+            var prefab = itemViewProvider.Peek(data);
             return prefab.Size;
         }
 
@@ -168,7 +171,7 @@ namespace IgorTime.PoolableScrollView
 
         private ElementView CreateElement(IElementData data, Vector2 position, int index)
         {
-            var elementView = GetElementView(data);
+            var elementView = itemViewProvider.Provide(data);
             elementView.Initialize(data, index);
             elementView.RectTransform.anchoredPosition = position;
             activeItemsCount++;
@@ -372,34 +375,16 @@ namespace IgorTime.PoolableScrollView
             {
                 scrollRect = GetComponent<ScrollRect>();
             }
-        }
 
-        private ElementView PeekElementView(IElementData data)
-        {
-            var pool = GetElementPool(data.PrefabPath);
-            return pool.Peek();
-        }
-
-        private ScrollElementsPool GetElementPool(string prefabPath)
-        {
-            if (!elementPools.TryGetValue(prefabPath, out var pool))
+            if (!itemViewProvider)
             {
-                elementPools[prefabPath] = pool = new ScrollElementsPool(prefabPath, Content);
+                itemViewProvider = GetComponent<ViewItemProvider>();
             }
-
-            return pool;
-        }
-
-        private ElementView GetElementView(IElementData data)
-        {
-            var pool = GetElementPool(data.PrefabPath);
-            return pool.Get();
         }
 
         private void ReleaseElement(ElementView element)
         {
-            var pool = GetElementPool(element.Data.PrefabPath);
-            pool.Release(element);
+            itemViewProvider.Release(element);
             activeItemsCount--;
         }
 

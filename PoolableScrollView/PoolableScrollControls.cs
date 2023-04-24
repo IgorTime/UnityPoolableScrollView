@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace IgorTime.PoolableScrollView
 {
     [RequireComponent(typeof(BasePoolableScrollView))]
-    [AddComponentMenu("IgorTime/PoolableScrollView/PoolableScrollControls")]
+    [AddComponentMenu(MenuConstants.ADD_COMPONENT_MENU_PATH + nameof(PoolableScrollControls))]
     public class PoolableScrollControls : MonoBehaviour
     {
         [FormerlySerializedAs("poolableScrollView")]
