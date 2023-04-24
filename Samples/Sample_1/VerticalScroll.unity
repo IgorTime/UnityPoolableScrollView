@@ -649,6 +649,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05e3b88f979d496383f3039f13f47f37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scrollRect: {fileID: 897748776}
   typeToPrefabMap:
   - typeName: SpriteData
     item: {fileID: 8422101032553784143, guid: b3a46f1bd4b323b4c8a429ec581741cd, type: 3}

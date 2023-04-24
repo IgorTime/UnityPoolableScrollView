@@ -11,7 +11,9 @@ namespace IgorTime.PoolableScrollView
         [Serializable]
         public class TypeNameToView
         {
+            [TypeDropdown(typeof(IElementData))]
             public string typeName;
+            
             public ElementView item;
         }
 
