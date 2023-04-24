@@ -1,6 +1,6 @@
 ﻿using IgorTime.PoolableScrollView.Helpers;
+using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace IgorTime.PoolableScrollView
@@ -9,15 +9,19 @@ namespace IgorTime.PoolableScrollView
     [AddComponentMenu(MenuConstants.ADD_COMPONENT_MENU_PATH + nameof(PoolableScrollControls))]
     public class PoolableScrollControls : MonoBehaviour
     {
-        [FormerlySerializedAs("poolableScrollView")]
         [SerializeField]
-        private BasePoolableScrollView basePoolableScrollView;
+        private BasePoolableScrollView poolableScrollView;
 
+        [Header("Buttons:")]
         [SerializeField]
         private Button buttonNext;
 
         [SerializeField]
         private Button buttonPrevious;
+
+        [Header("Search:")]
+        [SerializeField]
+        private TMP_InputField searchField;
 
         [Header("Animation:")]
         [SerializeField]
@@ -34,29 +38,39 @@ namespace IgorTime.PoolableScrollView
         {
             buttonNext.SubscribeOnClick(OnNextClick);
             buttonPrevious.SubscribeOnClick(OnPreviousClick);
+            searchField.SubscribeOnSubmit(OnSearchSubmit);
         }
 
         private void OnDisable()
         {
             buttonNext.UnsubscribeOnClick(OnNextClick);
             buttonPrevious.UnsubscribeOnClick(OnPreviousClick);
+            searchField.UnsubscribeOnSubmit(OnSearchSubmit);
+        }
+
+        private void OnSearchSubmit(string searchValue)
+        {
+            if (int.TryParse(searchValue, out var index))
+            {
+                poolableScrollView.ScrollToItem(index, scrollDuration, scrollNextCurve);
+            }
         }
 
         private void OnPreviousClick()
         {
-            basePoolableScrollView.ScrollToPrevious(scrollDuration, scrollPreviousCurve);
+            poolableScrollView.ScrollToPrevious(scrollDuration, scrollPreviousCurve);
         }
 
         private void OnNextClick()
         {
-            basePoolableScrollView.ScrollToNext(scrollDuration, scrollNextCurve);
+            poolableScrollView.ScrollToNext(scrollDuration, scrollNextCurve);
         }
 
         private void OnValidate()
         {
-            if (!basePoolableScrollView)
+            if (!poolableScrollView)
             {
-                basePoolableScrollView = GetComponent<BasePoolableScrollView>();
+                poolableScrollView = GetComponent<BasePoolableScrollView>();
             }
         }
     }
