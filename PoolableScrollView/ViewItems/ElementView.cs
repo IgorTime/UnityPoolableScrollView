@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 
 namespace IgorTime.PoolableScrollView
 {
@@ -6,6 +7,8 @@ namespace IgorTime.PoolableScrollView
     {
         [SerializeField]
         private int index;
+
+        public UnityEvent<float> onRelativePositionChanged = new();
 
         public int Index
         {
@@ -24,7 +27,13 @@ namespace IgorTime.PoolableScrollView
             UpdateContent(data);
         }
 
-        protected abstract void UpdateContent(IElementData data);
         public abstract void SetVisibility(bool isVisible);
+
+        protected abstract void UpdateContent(IElementData data);
+
+        internal void UpdateRelativePosition(float relativePosition)
+        {
+            onRelativePositionChanged.Invoke(relativePosition);
+        }
     }
 }
