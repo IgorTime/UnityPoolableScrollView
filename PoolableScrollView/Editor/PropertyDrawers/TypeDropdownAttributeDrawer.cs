@@ -28,10 +28,7 @@ namespace IgorTime.PoolableScrollView.Editor.PropertyDrawers
         }
 
         private static List<string> FindAllTypesImplementingInterface(Type interfaceType) =>
-            AppDomain.CurrentDomain
-                     .GetAssemblies()
-                     .SelectMany(s => s.GetTypes())
-                     .Where(p => interfaceType.IsAssignableFrom(p) && p.IsClass && !p.IsAbstract)
+            TypeCache.GetTypesDerivedFrom(interfaceType)
                      .Select(x => x.Name)
                      .ToList();
     }
