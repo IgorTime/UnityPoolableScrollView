@@ -1,3 +1,4 @@
+using IgorTime.PoolableScrollView.Helpers;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,9 +8,9 @@ namespace IgorTime.PoolableScrollView
     [AddComponentMenu("IgorTime/PoolableScrollView/VerticalScrollView")]
     public class VerticalScrollView : BasePoolableScrollView
     {
-        protected override Vector2 GetAnchoredPositionOfContentForItem(int itemIndex) => 
+        protected override Vector2 GetAnchoredPositionOfContentForItem(int itemIndex) =>
             new(0, ViewsData[itemIndex].Position.y - ViewportHeight * 0.5f);
-    
+
         protected override int FindClosestItemToCenter()
         {
             var index = -1;
@@ -51,10 +52,10 @@ namespace IgorTime.PoolableScrollView
         }
 
         protected override bool IsOutOfViewportInForwardDirection(int itemIndex, in Vector2 contentAnchoredPosition) =>
-            ViewsData[itemIndex].Min.y > contentAnchoredPosition.y + ViewportHeight; // IsBelowOfViewport
+            ScrollUtils.IsBelowOfViewport(ViewsData[itemIndex], contentAnchoredPosition.y, ViewportHeight);
 
         protected override bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 contentAnchoredPosition) =>
-            ViewsData[itemIndex].Max.y < contentAnchoredPosition.y; // IsAboveOfViewport
+            ScrollUtils.IsAboveOfViewport(ViewsData[itemIndex], contentAnchoredPosition.y);
 
         protected override Vector2 CalculateItemPositionInContent(in int itemIndex) =>
             new(0, ContentRect.height * 0.5f - ViewsData[itemIndex].Position.y);
@@ -63,33 +64,10 @@ namespace IgorTime.PoolableScrollView
             !IsOutOfViewportInBackwardDirection(itemIndex, contentAnchoredPosition) &&
             !IsOutOfViewportInForwardDirection(itemIndex, contentAnchoredPosition);
 
-        protected override int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition)
-        {
-            var startIndex = 0;
-            var endIndex = ViewsData.Length - 1;
-            while (true)
-            {
-                if (startIndex == endIndex)
-                {
-                    return -1;
-                }
-
-                var middleIndex = startIndex + (endIndex - startIndex) / 2;
-                if (IsPartiallyVisibleInViewport(middleIndex, contentAnchoredPosition))
-                {
-                    return middleIndex;
-                }
-
-                var middleElement = ViewsData[middleIndex];
-                if (middleElement.Position.y > contentAnchoredPosition.y)
-                {
-                    endIndex = middleIndex - 1;
-                }
-                else
-                {
-                    startIndex = middleIndex + 1;
-                }
-            }
-        }
+        protected override int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition) =>
+            ScrollUtils.BinarySearchOfFirstItemVisibleInViewportVertical(
+                ViewsData,
+                contentAnchoredPosition.y,
+                ViewportHeight);
     }
 }
