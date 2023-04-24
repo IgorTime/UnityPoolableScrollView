@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace IgorTime.PoolableScrollView
 {
     [RequireComponent(typeof(ScrollRect))]
-    public abstract class PoolableScroll : MonoBehaviour
+    public abstract class PoolableScrollView : MonoBehaviour
     {
         [SerializeField]
         protected ScrollRect scrollRect;

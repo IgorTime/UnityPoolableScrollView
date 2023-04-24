@@ -2,14 +2,16 @@ using System.Collections.Generic;
 using IgorTime.PoolableScrollView;
 using IgorTime.Samples.Sample_1.ElementData;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace IgorTime.Samples.Sample_1
 {
-    [RequireComponent(typeof(PoolableScroll))]
+    [RequireComponent(typeof(PoolableScrollView.PoolableScrollView))]
     public class ScrollInitializer : MonoBehaviour
     {
+        [FormerlySerializedAs("verticalScroll")]
         [SerializeField]
-        private PoolableScroll verticalScroll;
+        private PoolableScrollView.PoolableScrollView verticalScrollView;
 
         [SerializeField]
         private int itemsCount;
@@ -39,32 +41,32 @@ namespace IgorTime.Samples.Sample_1
                 dataList.Add(item);
             }
 
-            verticalScroll.Initialize(dataList.ToArray());
+            verticalScrollView.Initialize(dataList.ToArray());
         }
 
         [ContextMenu(nameof(ScrollTo))]
         public void ScrollTo()
         {
-            verticalScroll.ScrollToItem(itemIndex);
+            verticalScrollView.ScrollToItem(itemIndex);
         }
     
         [ContextMenu(nameof(ScrollToAnimated))]
         public void ScrollToAnimated()
         {
-            verticalScroll.ScrollToItem(itemIndex, animationDuration, easeInOut);
+            verticalScrollView.ScrollToItem(itemIndex, animationDuration, easeInOut);
         }
 
         [ContextMenu(nameof(Next))]
         public void Next()
         {
-            verticalScroll.ScrollToNext(animationDuration, easeInOut);
+            verticalScrollView.ScrollToNext(animationDuration, easeInOut);
         }
     
         [ContextMenu(nameof(Previous))]
 
         public void Previous()
         {
-            verticalScroll.ScrollToPrevious(animationDuration, easeInOut);
+            verticalScrollView.ScrollToPrevious(animationDuration, easeInOut);
         }
     
         private T GetRandom<T>(T[] array) => array[Random.Range(0, array.Length)];
