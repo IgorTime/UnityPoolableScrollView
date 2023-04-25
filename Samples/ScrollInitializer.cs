@@ -24,10 +24,10 @@ namespace IgorTime.Samples.Sample_1
 
         public void Start()
         {
-            var dataList = new List<IElementData>();
+            var dataList = new List<IItemData>();
             for (var i = 0; i < itemsCount; i++)
             {
-                IElementData item = Random.value > 0.5f
+                IItemData item = Random.value > 0.5f
                     ? new SpriteData {Sprite = GetRandom(sprites)}
                     : new TextData {Text = $"Item {i}"};
 

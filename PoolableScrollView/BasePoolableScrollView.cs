@@ -27,7 +27,7 @@ namespace IgorTime.PoolableScrollView
         protected int HeadIndex;
         protected int TrailIndex;
 
-        private IElementData[] itemsData;
+        private IItemData[] itemsData;
         private Vector2? previousContentPosition;
         private int activeItemsCount;
         private Coroutine scrollCoroutine;
@@ -83,7 +83,7 @@ namespace IgorTime.PoolableScrollView
             scrollRect.onValueChanged.RemoveListener(UpdateScrollItems);
         }
 
-        public void Initialize(IElementData[] itemsData)
+        public void Initialize(IItemData[] itemsData)
         {
             this.itemsData = itemsData;
             InitViewsData(this.itemsData, out var contentSize);
@@ -167,7 +167,7 @@ namespace IgorTime.PoolableScrollView
             }
         }
 
-        protected abstract void InitViewsData(IElementData[] dataElements, out Vector2 contentSize);
+        protected abstract void InitViewsData(IItemData[] dataElements, out Vector2 contentSize);
         protected abstract bool IsMovingForward(in Vector2 contentDeltaPosition);
         protected abstract bool IsFastScrolling(in Vector2 contentDeltaPosition);
         protected abstract Vector2 CalculateItemPositionInContent(in int itemIndex);
@@ -178,7 +178,7 @@ namespace IgorTime.PoolableScrollView
         public abstract int FindClosestItemToCenter();
         protected abstract Vector2 GetAnchoredPositionOfContentForItem(int itemIndex);
 
-        protected Vector2 GetElementSize(IElementData data)
+        protected Vector2 GetElementSize(IItemData data)
         {
             var prefab = itemViewProvider.Peek(data);
             return prefab.Size;
@@ -215,7 +215,7 @@ namespace IgorTime.PoolableScrollView
         private bool IsScrolledToTheEnd() => HeadIndex == itemsData.Length - 1;
         private bool IsScrolledToTheStart() => TrailIndex == 0;
 
-        private ElementView CreateElement(IElementData data, Vector2 position, int index)
+        private ElementView CreateElement(IItemData data, Vector2 position, int index)
         {
             var elementView = itemViewProvider.Provide(data);
             elementView.Initialize(data, index);
@@ -462,7 +462,7 @@ namespace IgorTime.PoolableScrollView
             }
         }
 
-        private void CreateInitialElements(IElementData[] elementsData, in Vector2 anchoredPosition)
+        private void CreateInitialElements(IItemData[] elementsData, in Vector2 anchoredPosition)
         {
             HeadIndex = -1;
             for (var i = 0; i < elementsData.Length; i++)

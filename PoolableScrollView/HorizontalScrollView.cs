@@ -34,7 +34,7 @@ namespace IgorTime.PoolableScrollView
         protected override bool IsFastScrolling(in Vector2 deltaPosition) =>
             Mathf.Abs(deltaPosition.x) > ViewportWidth * 2;
 
-        protected override void InitViewsData(IElementData[] dataElements, out Vector2 contentSize)
+        protected override void InitViewsData(IItemData[] dataElements, out Vector2 contentSize)
         {
             ViewsData = new ElementViewData [dataElements.Length];
 

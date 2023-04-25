@@ -13,7 +13,7 @@ namespace IgorTime.Samples.Sample_1.ViewElements
         [SerializeField]
         private CanvasGroup canvasGroup;
 
-        protected override void UpdateContent(IElementData data)
+        protected override void UpdateContent(IItemData data)
         {
             var textData = (TextData) data;
             text.text = textData.Text;

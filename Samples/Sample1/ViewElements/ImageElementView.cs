@@ -10,7 +10,7 @@ namespace IgorTime.Samples.Sample_1.ViewElements
         [SerializeField]
         private Image image;
 
-        protected override void UpdateContent(IElementData data)
+        protected override void UpdateContent(IItemData data)
         {
             var spriteData = (SpriteData) data;
             image.sprite = spriteData.Sprite;

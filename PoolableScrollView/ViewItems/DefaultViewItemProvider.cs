@@ -11,7 +11,7 @@ namespace IgorTime.PoolableScrollView
         [Serializable]
         public class TypeNameToView
         {
-            [TypeDropdown(typeof(IElementData))]
+            [TypeDropdown(typeof(IItemData))]
             public string typeName;
             
             public ElementView item;
@@ -55,7 +55,7 @@ namespace IgorTime.PoolableScrollView
             }
         }
 
-        protected override ElementView GetPrefab(IElementData dataItem)
+        protected override ElementView GetPrefab(IItemData dataItem)
         {
             var typeName = dataItem.GetType().Name;
             return internalMap[typeName];

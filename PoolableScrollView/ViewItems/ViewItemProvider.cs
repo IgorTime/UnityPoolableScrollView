@@ -13,7 +13,7 @@ namespace IgorTime.PoolableScrollView
 
         private readonly Dictionary<Type, ScrollElementsPool> elementPools = new();
 
-        public ElementView Provide(IElementData dataItem)
+        public ElementView Provide(IItemData dataItem)
         {
             var pool = GetElementPool(dataItem);
             return pool.Get();
@@ -25,13 +25,13 @@ namespace IgorTime.PoolableScrollView
             pool.Release(element);
         }
 
-        public ElementView Peek(IElementData data)
+        public ElementView Peek(IItemData data)
         {
             var pool = GetElementPool(data);
             return pool.Peek();
         }
 
-        protected abstract ElementView GetPrefab(IElementData dataItem);
+        protected abstract ElementView GetPrefab(IItemData dataItem);
 
         private void OnValidate()
         {
@@ -41,7 +41,7 @@ namespace IgorTime.PoolableScrollView
             }
         }
 
-        private ScrollElementsPool GetElementPool(IElementData itemData)
+        private ScrollElementsPool GetElementPool(IItemData itemData)
         {
             var dataType = itemData.GetType();
             if (!elementPools.TryGetValue(dataType, out var pool))

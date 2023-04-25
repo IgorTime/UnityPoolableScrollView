@@ -1,6 +1,6 @@
 ﻿namespace IgorTime.PoolableScrollView
 {
-    public interface IElementData
+    public interface IItemData
     {
     }
 }

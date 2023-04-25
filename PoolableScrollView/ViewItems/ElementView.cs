@@ -16,11 +16,11 @@ namespace IgorTime.PoolableScrollView
             private set => index = value;
         }
 
-        public IElementData Data { get; private set; }
+        public IItemData Data { get; private set; }
         public RectTransform RectTransform => (RectTransform) transform;
         public Vector2 Size => RectTransform.rect.size;
 
-        public void Initialize(IElementData data, int index)
+        public void Initialize(IItemData data, int index)
         {
             Index = index;
             Data = data;
@@ -29,7 +29,7 @@ namespace IgorTime.PoolableScrollView
 
         public abstract void SetVisibility(bool isVisible);
 
-        protected abstract void UpdateContent(IElementData data);
+        protected abstract void UpdateContent(IItemData data);
 
         internal void UpdateRelativePosition(float relativePosition)
         {
