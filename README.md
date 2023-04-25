@@ -13,3 +13,4 @@
 
 ## Not supported:
 - Infinite scrolling
+- Adding\Removing items after initialization
