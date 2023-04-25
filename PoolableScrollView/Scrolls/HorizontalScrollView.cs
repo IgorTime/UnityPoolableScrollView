@@ -2,11 +2,9 @@
 using IgorTime.PoolableScrollView.Helpers;
 using IgorTime.PoolableScrollView.ItemView;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace IgorTime.PoolableScrollView.Scrolls
 {
-    [RequireComponent(typeof(ScrollRect))]
     [AddComponentMenu(MenuConstants.ADD_COMPONENT_MENU_PATH + nameof(HorizontalScrollView))]
     public class HorizontalScrollView : BasePoolableScrollView
     {
@@ -76,8 +74,8 @@ namespace IgorTime.PoolableScrollView.Scrolls
 
         protected override void UpdateItemsRelativePosition()
         {
-            var viewportPositionX = scrollRect.viewport.position.x;
-            var viewportHalfHeight = scrollRect.viewport.rect.width * 0.5f;
+            var viewportPositionX = viewport.position.x;
+            var viewportHalfHeight = viewport.rect.width * 0.5f;
             foreach (var activeElement in ActiveElements.Values)
             {
                 var d = Mathf.Abs(activeElement.RectTransform.position.x - viewportPositionX);

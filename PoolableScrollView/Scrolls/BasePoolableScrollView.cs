@@ -4,21 +4,19 @@ using System.Collections.Generic;
 using IgorTime.PoolableScrollView.DataItems;
 using IgorTime.PoolableScrollView.ItemView;
 using UnityEngine;
-using UnityEngine.Serialization;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace IgorTime.PoolableScrollView.Scrolls
 {
-    [RequireComponent(typeof(ScrollRect))]
     [RequireComponent(typeof(ItemViewProvider))]
-    public abstract class BasePoolableScrollView : MonoBehaviour
+    public abstract class BasePoolableScrollView : ScrollRect
     {
         [SerializeField]
-        protected ScrollRect scrollRect;
-
-        [FormerlySerializedAs("itemViewProvider")]
-        [SerializeField]
         protected ItemViewProvider itemViewProvider;
+
+        [SerializeField]
+        private bool interactable = true;
 
         protected readonly Dictionary<int, ItemView.ItemView> ActiveElements = new();
 
@@ -37,7 +35,7 @@ namespace IgorTime.PoolableScrollView.Scrolls
         private Coroutine scrollCoroutine;
 
         public bool IsAnimated => scrollCoroutine != null;
-        
+
         private ItemView.ItemView Head
         {
             get
@@ -68,23 +66,26 @@ namespace IgorTime.PoolableScrollView.Scrolls
             }
         }
 
-        private void Awake()
+        protected override void Awake()
         {
-            Content = scrollRect.content;
+            base.Awake();
+            Content = content;
 
-            var viewportRect = scrollRect.viewport.rect;
+            var viewportRect = viewport.rect;
             ViewportHeight = viewportRect.height;
             ViewportWidth = viewportRect.width;
         }
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
-            scrollRect.onValueChanged.AddListener(UpdateScrollItems);
+            base.OnEnable();
+            onValueChanged.AddListener(UpdateScrollItems);
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
-            scrollRect.onValueChanged.RemoveListener(UpdateScrollItems);
+            base.OnDisable();
+            onValueChanged.RemoveListener(UpdateScrollItems);
         }
 
         public void Initialize(IItemData[] itemsData)
@@ -92,7 +93,7 @@ namespace IgorTime.PoolableScrollView.Scrolls
             this.itemsData = itemsData;
             InitViewsData(this.itemsData, out var contentSize);
             Content.sizeDelta = contentSize;
-            ContentRect = scrollRect.content.rect;
+            ContentRect = content.rect;
             previousContentPosition = Content.anchoredPosition;
             CreateInitialElements(itemsData, Content.anchoredPosition);
             UpdateItemsRelativePosition();
@@ -100,12 +101,12 @@ namespace IgorTime.PoolableScrollView.Scrolls
 
         public void ScrollToItem(int itemIndex)
         {
-            scrollRect.velocity = Vector2.zero;
+            velocity = Vector2.zero;
             Content.anchoredPosition = GetAnchoredPositionOfContentForItem(itemIndex);
         }
 
         public void ScrollToItem(
-            int itemIndex, 
+            int itemIndex,
             float duration,
             AnimationCurve easingCurve = null,
             Action onCompleted = null)
@@ -115,7 +116,7 @@ namespace IgorTime.PoolableScrollView.Scrolls
                 return;
             }
 
-            scrollRect.velocity = Vector2.zero;
+            velocity = Vector2.zero;
 
             var targetPosition = GetAnchoredPositionOfContentForItem(itemIndex);
             scrollCoroutine = StartCoroutine(ScrollCoroutine(targetPosition, duration, easingCurve, onCompleted));
@@ -136,8 +137,8 @@ namespace IgorTime.PoolableScrollView.Scrolls
         }
 
         public void ScrollToNext(
-            float duration, 
-            AnimationCurve easingCurve = null, 
+            float duration,
+            AnimationCurve easingCurve = null,
             Action onCompleted = null)
         {
             var index = FindClosestItemToCenter();
@@ -154,8 +155,8 @@ namespace IgorTime.PoolableScrollView.Scrolls
         }
 
         public void ScrollToPrevious(
-            float duration, 
-            AnimationCurve easingCurve = null, 
+            float duration,
+            AnimationCurve easingCurve = null,
             Action onCompleted = null)
         {
             var index = FindClosestItemToCenter();
@@ -171,6 +172,38 @@ namespace IgorTime.PoolableScrollView.Scrolls
             }
         }
 
+        public abstract int FindClosestItemToCenter();
+
+        public override void OnBeginDrag(PointerEventData eventData)
+        {
+            if (!interactable)
+            {
+                return;
+            }
+
+            base.OnBeginDrag(eventData);
+        }
+
+        public override void OnEndDrag(PointerEventData eventData)
+        {
+            if (!interactable)
+            {
+                return;
+            }
+
+            base.OnEndDrag(eventData);
+        }
+
+        public override void OnDrag(PointerEventData eventData)
+        {
+            if (!interactable)
+            {
+                return;
+            }
+
+            base.OnDrag(eventData);
+        }
+
         protected abstract void InitViewsData(IItemData[] dataElements, out Vector2 contentSize);
         protected abstract bool IsMovingForward(in Vector2 contentDeltaPosition);
         protected abstract bool IsFastScrolling(in Vector2 contentDeltaPosition);
@@ -179,7 +212,6 @@ namespace IgorTime.PoolableScrollView.Scrolls
         protected abstract bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 contentAnchoredPosition);
         protected abstract bool IsPartiallyVisibleInViewport(in int itemIndex, in Vector2 contentAnchoredPosition);
         protected abstract int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition);
-        public abstract int FindClosestItemToCenter();
         protected abstract Vector2 GetAnchoredPositionOfContentForItem(int itemIndex);
 
         protected Vector2 GetElementSize(IItemData data)
@@ -187,6 +219,8 @@ namespace IgorTime.PoolableScrollView.Scrolls
             var prefab = itemViewProvider.Peek(data);
             return prefab.Size;
         }
+
+        protected abstract void UpdateItemsRelativePosition();
 
         private IEnumerator ScrollCoroutine(
             Vector2 targetPosition,
@@ -235,7 +269,7 @@ namespace IgorTime.PoolableScrollView.Scrolls
                 ReleaseElement(Head);
                 ActiveElements.Remove(HeadIndex);
             }
-            
+
             HeadIndex--;
         }
 
@@ -303,7 +337,7 @@ namespace IgorTime.PoolableScrollView.Scrolls
         }
 
         private void HandleMovement(
-            in Vector2 contentDeltaPosition, 
+            in Vector2 contentDeltaPosition,
             in Vector2 contentAnchoredPosition)
         {
             if (IsMovingForward(contentDeltaPosition))
@@ -315,8 +349,6 @@ namespace IgorTime.PoolableScrollView.Scrolls
                 HandleMovementBackward(contentAnchoredPosition);
             }
         }
-
-        protected abstract void UpdateItemsRelativePosition();
 
         private void HandleMovementBackward(in Vector2 contentAnchoredPosition)
         {
@@ -429,11 +461,6 @@ namespace IgorTime.PoolableScrollView.Scrolls
 
         private void OnValidate()
         {
-            if (!scrollRect)
-            {
-                scrollRect = GetComponent<ScrollRect>();
-            }
-
             if (!itemViewProvider)
             {
                 itemViewProvider = GetComponent<ItemViewProvider>();

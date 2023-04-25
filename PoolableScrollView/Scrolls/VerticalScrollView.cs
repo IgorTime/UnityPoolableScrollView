@@ -2,17 +2,12 @@ using IgorTime.PoolableScrollView.DataItems;
 using IgorTime.PoolableScrollView.Helpers;
 using IgorTime.PoolableScrollView.ItemView;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace IgorTime.PoolableScrollView.Scrolls
 {
-    [RequireComponent(typeof(ScrollRect))]
     [AddComponentMenu(MenuConstants.ADD_COMPONENT_MENU_PATH + nameof(VerticalScrollView))]
     public class VerticalScrollView : BasePoolableScrollView
     {
-        protected override Vector2 GetAnchoredPositionOfContentForItem(int itemIndex) =>
-            new(0, ViewsData[itemIndex].Position.y - ViewportHeight * 0.5f);
-
         public override int FindClosestItemToCenter()
         {
             var index = -1;
@@ -30,6 +25,9 @@ namespace IgorTime.PoolableScrollView.Scrolls
 
             return index;
         }
+
+        protected override Vector2 GetAnchoredPositionOfContentForItem(int itemIndex) =>
+            new(0, ViewsData[itemIndex].Position.y - ViewportHeight * 0.5f);
 
         protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => contentDeltaPosition.y > 0;
 
@@ -71,11 +69,11 @@ namespace IgorTime.PoolableScrollView.Scrolls
                 ViewsData,
                 contentAnchoredPosition.y,
                 ViewportHeight);
-        
+
         protected override void UpdateItemsRelativePosition()
         {
-            var viewportPositionY = scrollRect.viewport.position.y;
-            var viewportHalfHeight = scrollRect.viewport.rect.height * 0.5f;
+            var viewportPositionY = viewport.position.y;
+            var viewportHalfHeight = viewport.rect.height * 0.5f;
             foreach (var activeElement in ActiveElements.Values)
             {
                 var d = Mathf.Abs(activeElement.RectTransform.position.y - viewportPositionY);
