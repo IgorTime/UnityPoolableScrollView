@@ -1,17 +1,12 @@
 ﻿using IgorTime.PoolableScrollView.Scrolls;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace IgorTime.PoolableScrollView.Features
 {
-    [RequireComponent(typeof(ScrollRect))]
     [RequireComponent(typeof(BasePoolableScrollView))]
     public class ScrollSnapping : MonoBehaviour, IBeginDragHandler, IEndDragHandler
     {
-        [SerializeField]
-        private ScrollRect scrollRect;
-
         [SerializeField]
         private BasePoolableScrollView poolableScrollView;
 
@@ -35,12 +30,12 @@ namespace IgorTime.PoolableScrollView.Features
 
         private void OnEnable()
         {
-            scrollRect.onValueChanged.AddListener(OnScrollValueChanged);
+            poolableScrollView.onValueChanged.AddListener(OnScrollValueChanged);
         }
 
         private void OnDisable()
         {
-            scrollRect.onValueChanged.RemoveListener(OnScrollValueChanged);
+            poolableScrollView.onValueChanged.RemoveListener(OnScrollValueChanged);
         }
 
         public void OnBeginDrag(PointerEventData eventData)
@@ -66,7 +61,7 @@ namespace IgorTime.PoolableScrollView.Features
 
         private void HandleSnapping()
         {
-            if (Mathf.Abs(scrollRect.velocity.sqrMagnitude) > sqrThreshold)
+            if (Mathf.Abs(poolableScrollView.velocity.sqrMagnitude) > sqrThreshold)
             {
                 return;
             }
@@ -77,11 +72,6 @@ namespace IgorTime.PoolableScrollView.Features
 
         private void OnValidate()
         {
-            if (!scrollRect)
-            {
-                scrollRect = GetComponent<ScrollRect>();
-            }
-
             if (!poolableScrollView)
             {
                 poolableScrollView = GetComponent<BasePoolableScrollView>();

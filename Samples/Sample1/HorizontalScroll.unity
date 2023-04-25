@@ -660,7 +660,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   itemViewProvider: {fileID: 529470368}
-  interactable: 1
+  interactable: 0
 --- !u!114 &529470368
 MonoBehaviour:
   m_ObjectHideFlags: 0
