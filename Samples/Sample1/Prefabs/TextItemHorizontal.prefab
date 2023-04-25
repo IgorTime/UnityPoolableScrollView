@@ -85,8 +85,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemView: {fileID: 7104989247162339680}
-  minScale: {x: 1, y: 1}
-  maxScale: {x: 1, y: 1}
+  minScale: {x: 0.5, y: 0.5}
+  maxScale: {x: 1.2, y: 1.2}
 --- !u!1 &5957043593088750600
 GameObject:
   m_ObjectHideFlags: 0
@@ -180,10 +180,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 60
+  m_fontSize: 72
   m_fontSizeBase: 60
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0

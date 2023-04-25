@@ -771,7 +771,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scrollRect: {fileID: 529470362}
   poolableScrollView: {fileID: 529470367}
-  speedThreshold: 0.1
+  speedThreshold: 100
   snappingDuration: 0.05
   snappingCurve:
     serializedVersion: 2

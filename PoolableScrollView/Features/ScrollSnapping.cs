@@ -17,7 +17,7 @@ namespace IgorTime.PoolableScrollView.Features
 
         [Header("Settings:")]
         [SerializeField]
-        private float speedThreshold = 0.1f;
+        private float speedThreshold = 100f;
 
         [SerializeField]
         private float snappingDuration = 0.05f;

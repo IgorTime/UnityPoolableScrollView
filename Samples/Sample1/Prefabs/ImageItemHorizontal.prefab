@@ -149,8 +149,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemView: {fileID: 8422101032553784143}
-  minScale: {x: 1, y: 1}
-  maxScale: {x: 1, y: 1}
+  minScale: {x: 0.5, y: 0.5}
+  maxScale: {x: 1.2, y: 1.2}
 --- !u!225 &241873251260128787
 CanvasGroup:
   m_ObjectHideFlags: 0
