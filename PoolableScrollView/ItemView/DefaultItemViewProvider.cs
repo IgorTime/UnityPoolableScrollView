@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using IgorTime.PoolableScrollView.Helpers;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace IgorTime.PoolableScrollView
 {
@@ -38,7 +37,6 @@ namespace IgorTime.PoolableScrollView
             {
                 return false;
             }
-            
 
             return typeNameToView.prefab != null;
         }
