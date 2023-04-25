@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace IgorTime.PoolableScrollView
+namespace IgorTime.PoolableScrollView.ItemView
 {
     [RequireComponent(typeof(ItemView))]
     public abstract class ItemViewAnimation : MonoBehaviour

@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using IgorTime.PoolableScrollView.Scrolls;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace IgorTime.PoolableScrollView
+namespace IgorTime.PoolableScrollView.Features
 {
     [RequireComponent(typeof(ScrollRect))]
     [RequireComponent(typeof(BasePoolableScrollView))]

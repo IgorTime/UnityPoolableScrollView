@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace IgorTime.PoolableScrollView
+namespace IgorTime.PoolableScrollView.ItemView
 {
     public interface IItemViewDataTypeConstrain
     {

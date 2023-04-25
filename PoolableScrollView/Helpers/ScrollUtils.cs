@@ -1,4 +1,6 @@
-﻿namespace IgorTime.PoolableScrollView.Helpers
+﻿using IgorTime.PoolableScrollView.ItemView;
+
+namespace IgorTime.PoolableScrollView.Helpers
 {
     public static class ScrollUtils
     {

@@ -1,9 +1,10 @@
 ﻿using IgorTime.PoolableScrollView.Helpers;
+using IgorTime.PoolableScrollView.Scrolls;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace IgorTime.PoolableScrollView
+namespace IgorTime.PoolableScrollView.Features
 {
     [RequireComponent(typeof(BasePoolableScrollView))]
     [AddComponentMenu(MenuConstants.ADD_COMPONENT_MENU_PATH + nameof(PoolableScrollControls))]

@@ -1,7 +1,7 @@
-﻿using IgorTime.PoolableScrollView;
+﻿using IgorTime.PoolableScrollView.ItemView;
 using UnityEngine;
 
-namespace IgorTime.Samples.Sample_1.ViewElements
+namespace IgorTime.Samples.Sample1.ViewElements
 {
     public class ScaleAnimation : ItemViewAnimation
     {

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using IgorTime.PoolableScrollView.DataItems;
 using IgorTime.PoolableScrollView.Helpers;
 using UnityEngine;
 
-namespace IgorTime.PoolableScrollView
+namespace IgorTime.PoolableScrollView.ItemView
 {
     [AddComponentMenu(MenuConstants.ADD_COMPONENT_MENU_PATH + nameof(DefaultItemViewProvider))]
     public class DefaultItemViewProvider : ItemViewProvider, ISerializationCallbackReceiver

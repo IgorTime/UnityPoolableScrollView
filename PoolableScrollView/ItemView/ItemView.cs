@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+﻿using IgorTime.PoolableScrollView.DataItems;
+using UnityEngine;
 using UnityEngine.Events;
 
-namespace IgorTime.PoolableScrollView
+namespace IgorTime.PoolableScrollView.ItemView
 {
     public abstract class ItemView : MonoBehaviour
     {
