@@ -25,6 +25,12 @@ namespace IgorTime.PoolableScrollView
         private AnimationCurve snappingCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
         private bool isDragging;
+        private float sqrThreshold;
+
+        private void Awake()
+        {
+            sqrThreshold = speedThreshold * speedThreshold;
+        }
 
         private void OnEnable()
         {
@@ -59,16 +65,13 @@ namespace IgorTime.PoolableScrollView
 
         private void HandleSnapping()
         {
-            if (Mathf.Abs(scrollRect.velocity.magnitude) < speedThreshold)
+            if (Mathf.Abs(scrollRect.velocity.sqrMagnitude) > sqrThreshold)
             {
-                Snap();
+                return;
             }
-        }
 
-        private void Snap()
-        {
-            var centerItem = poolableScrollView.FindClosestItemToCenter();
-            poolableScrollView.ScrollToItem(centerItem, snappingDuration, snappingCurve);
+            var centeredItem = poolableScrollView.FindClosestItemToCenter();
+            poolableScrollView.ScrollToItem(centeredItem, snappingDuration, snappingCurve);
         }
 
         private void OnValidate()

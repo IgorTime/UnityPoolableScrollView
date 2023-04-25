@@ -6,6 +6,5 @@ namespace IgorTime.Samples.Sample_1.ElementData
     public class SpriteData : IElementData
     {
         public Sprite Sprite { get; set; }
-        public string PrefabPath => "ImageElement";
     }
 }

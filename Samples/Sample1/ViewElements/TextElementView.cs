@@ -22,7 +22,6 @@ namespace IgorTime.Samples.Sample_1.ViewElements
         public override void SetVisibility(bool isVisible)
         {
             canvasGroup.alpha = isVisible ? 1 : 0;
-            // text.enabled = isVisible;
         }
     }
 }
