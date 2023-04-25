@@ -5,14 +5,13 @@ using UnityEngine.UI;
 
 namespace IgorTime.Samples.Sample_1.ViewElements
 {
-    public class ImageItemView : ItemView
+    public class ImageItemView : ItemViewTyped<SpriteData>
     {
         [SerializeField]
         private Image image;
 
-        protected override void UpdateContent(IItemData data)
+        protected override void UpdateContent(SpriteData spriteData)
         {
-            var spriteData = (SpriteData) data;
             image.sprite = spriteData.Sprite;
         }
 

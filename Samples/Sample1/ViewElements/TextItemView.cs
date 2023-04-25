@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace IgorTime.Samples.Sample_1.ViewElements
 {
-    public class TextItemView : ItemView
+    public class TextItemView : ItemViewTyped<TextData>
     {
         [SerializeField]
         private TextMeshProUGUI text;
@@ -13,9 +13,8 @@ namespace IgorTime.Samples.Sample_1.ViewElements
         [SerializeField]
         private CanvasGroup canvasGroup;
 
-        protected override void UpdateContent(IItemData data)
+        protected override void UpdateContent(TextData textData)
         {
-            var textData = (TextData) data;
             text.text = textData.Text;
         }
 
