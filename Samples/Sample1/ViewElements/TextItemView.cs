@@ -7,20 +7,25 @@ namespace IgorTime.Samples.Sample_1.ViewElements
 {
     public class TextItemView : ItemViewTyped<TextData>
     {
+        [Header("Item specific:")]
         [SerializeField]
-        private TextMeshProUGUI text;
-    
+        private TextMeshProUGUI indexField;
+
+        [SerializeField]
+        private TextMeshProUGUI messageField;
+
         [SerializeField]
         private CanvasGroup canvasGroup;
-
-        protected override void UpdateContent(TextData textData)
-        {
-            text.text = textData.Text;
-        }
 
         public override void SetVisibility(bool isVisible)
         {
             canvasGroup.alpha = isVisible ? 1 : 0;
+        }
+
+        protected override void UpdateContent(TextData textData)
+        {
+            messageField.text = textData.Message;
+            indexField.text = Index.ToString();
         }
     }
 }

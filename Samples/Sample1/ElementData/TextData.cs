@@ -4,6 +4,6 @@ namespace IgorTime.Samples.Sample_1.ElementData
 {
     public class TextData : IItemData
     {
-        public string Text { get; set; }
+        public string Message { get; set; }
     }
 }

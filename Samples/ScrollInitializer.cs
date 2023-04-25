@@ -6,7 +6,6 @@ using UnityEngine.Serialization;
 
 namespace IgorTime.Samples.Sample_1
 {
-    [RequireComponent(typeof(BasePoolableScrollView))]
     public class ScrollInitializer : MonoBehaviour
     {
         [FormerlySerializedAs("verticalScrollView")]
@@ -20,7 +19,7 @@ namespace IgorTime.Samples.Sample_1
         private Sprite[] sprites;
 
         [SerializeField]
-        private int itemIndex;
+        private string[] messages;
 
         public void Start()
         {
@@ -29,7 +28,7 @@ namespace IgorTime.Samples.Sample_1
             {
                 IItemData item = Random.value > 0.5f
                     ? new SpriteData {Sprite = GetRandom(sprites)}
-                    : new TextData {Text = $"Item {i}"};
+                    : new TextData {Message = GetRandom(messages)};
 
                 dataList.Add(item);
             }
@@ -37,12 +36,6 @@ namespace IgorTime.Samples.Sample_1
             scrollView.Initialize(dataList.ToArray());
         }
 
-        [ContextMenu(nameof(ScrollTo))]
-        public void ScrollTo()
-        {
-            scrollView.ScrollToItem(itemIndex);
-        }
-
-        private T GetRandom<T>(T[] array) => array[Random.Range(0, array.Length)];
+        private static T GetRandom<T>(IReadOnlyList<T> array) => array[Random.Range(0, array.Count)];
     }
 }
