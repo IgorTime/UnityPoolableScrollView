@@ -14,6 +14,7 @@ namespace IgorTime.PoolableScrollView.Editor.PropertyDrawers
             var targetType = ((TypeDropdownAttribute) attribute).Type;
             var dropdown = new PopupField<string>
             {
+                label = "Data Type",
                 choices = FindAllTypesImplementingInterface(targetType),
                 value = property.stringValue,
             };

@@ -864,9 +864,9 @@ MonoBehaviour:
   scrollRect: {fileID: 897748776}
   typeToPrefabMap:
   - typeName: SpriteData
-    item: {fileID: 8422101032553784143, guid: b3a46f1bd4b323b4c8a429ec581741cd, type: 3}
+    prefab: {fileID: 8422101032553784143, guid: b3a46f1bd4b323b4c8a429ec581741cd, type: 3}
   - typeName: TextData
-    item: {fileID: 7104989247162339680, guid: d8c7e522f8762404fb2b342ef7829ef9, type: 3}
+    prefab: {fileID: 7104989247162339680, guid: d8c7e522f8762404fb2b342ef7829ef9, type: 3}
 --- !u!114 &897748781
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -882,7 +882,7 @@ MonoBehaviour:
   scrollRect: {fileID: 897748776}
   poolableScrollView: {fileID: 897748775}
   speedThreshold: 300
-  snappingDuration: 0.05
+  snappingDuration: 0.1
   snappingCurve:
     serializedVersion: 2
     m_Curve:

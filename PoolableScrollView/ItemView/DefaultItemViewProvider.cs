@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using IgorTime.PoolableScrollView.Helpers;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace IgorTime.PoolableScrollView
 {
@@ -13,8 +14,8 @@ namespace IgorTime.PoolableScrollView
         {
             [TypeDropdown(typeof(IItemData))]
             public string typeName;
-            
-            public ItemView item;
+
+            public ItemView prefab;
         }
 
         [SerializeField]
@@ -22,7 +23,11 @@ namespace IgorTime.PoolableScrollView
 
         private Dictionary<string, ItemView> internalMap;
 
-        private static bool IsValid(TypeNameToView typeNameToView)
+        private static bool ValidateItemView(TypeNameToView typeNameToView) =>
+            BasicValidationIfItemView(typeNameToView) &&
+            DataTypeAndViewTypeValidationOfItemView(typeNameToView);
+
+        private static bool BasicValidationIfItemView(TypeNameToView typeNameToView)
         {
             if (typeNameToView == null)
             {
@@ -33,8 +38,28 @@ namespace IgorTime.PoolableScrollView
             {
                 return false;
             }
+            
 
-            return typeNameToView.item != null;
+            return typeNameToView.prefab != null;
+        }
+
+        private static bool DataTypeAndViewTypeValidationOfItemView(TypeNameToView typeNameToView)
+        {
+            if (typeNameToView.prefab is not IItemViewDataTypeConstrain constrain)
+            {
+                Debug.LogError("Support only ItemViewTyped items");
+                typeNameToView.prefab = null;
+                return false;
+            }
+
+            if (typeNameToView.typeName == constrain.DataType.Name)
+            {
+                return true;
+            }
+
+            Debug.LogError($"Item {typeNameToView.prefab.name} has wrong type {typeNameToView.typeName}");
+            typeNameToView.prefab = null;
+            return false;
         }
 
         public void OnBeforeSerialize()
@@ -46,12 +71,12 @@ namespace IgorTime.PoolableScrollView
             internalMap = new Dictionary<string, ItemView>();
             foreach (var typeNameToView in typeToPrefabMap)
             {
-                if (!IsValid(typeNameToView))
+                if (!BasicValidationIfItemView(typeNameToView))
                 {
                     continue;
                 }
 
-                internalMap[typeNameToView.typeName] = typeNameToView.item;
+                internalMap[typeNameToView.typeName] = typeNameToView.prefab;
             }
         }
 
@@ -59,6 +84,21 @@ namespace IgorTime.PoolableScrollView
         {
             var typeName = dataItem.GetType().Name;
             return internalMap[typeName];
+        }
+
+        protected override void OnValidate()
+        {
+            base.OnValidate();
+
+            ValidateItemViews();
+        }
+
+        private void ValidateItemViews()
+        {
+            foreach (var typeNameToView in typeToPrefabMap)
+            {
+                ValidateItemView(typeNameToView);
+            }
         }
     }
 }

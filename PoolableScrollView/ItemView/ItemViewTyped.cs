@@ -2,7 +2,7 @@
 
 namespace IgorTime.PoolableScrollView
 {
-    public abstract class ItemViewTyped<T> : ItemView
+    public abstract class ItemViewTyped<T> : ItemView, IItemViewDataTypeConstrain
         where T : IItemData
     {
         public Type DataType => typeof(T);

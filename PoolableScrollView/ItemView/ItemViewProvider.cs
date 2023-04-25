@@ -33,7 +33,7 @@ namespace IgorTime.PoolableScrollView
 
         protected abstract ItemView GetPrefab(IItemData dataItem);
 
-        private void OnValidate()
+        protected virtual void OnValidate()
         {
             if (!scrollRect)
             {
