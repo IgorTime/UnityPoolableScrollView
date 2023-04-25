@@ -8,5 +8,8 @@
 - Very fast, even with thousands of items
 - Recycling items under the hood
 - Optional snapping
-- API such as ScrollToItem(int itemIndex), ScrollToNext, ScrollToPrevious (with optional animationa)
+- API such as ScrollToItem(int itemIndex), ScrollToNext, ScrollToPrevious (with optional animation)
 - Individual Item animation (optional)
+
+## Not supported:
+- Infinite scrolling
