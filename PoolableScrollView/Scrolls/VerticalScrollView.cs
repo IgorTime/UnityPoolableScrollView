@@ -1,8 +1,10 @@
+using IgorTime.PoolableScrollView.DataItems;
 using IgorTime.PoolableScrollView.Helpers;
+using IgorTime.PoolableScrollView.ItemView;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace IgorTime.PoolableScrollView
+namespace IgorTime.PoolableScrollView.Scrolls
 {
     [RequireComponent(typeof(ScrollRect))]
     [AddComponentMenu(MenuConstants.ADD_COMPONENT_MENU_PATH + nameof(VerticalScrollView))]

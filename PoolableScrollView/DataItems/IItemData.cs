@@ -1,4 +1,4 @@
-﻿namespace IgorTime.PoolableScrollView
+﻿namespace IgorTime.PoolableScrollView.DataItems
 {
     public interface IItemData
     {

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using IgorTime.PoolableScrollView.DataItems;
+using IgorTime.PoolableScrollView.Pool;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace IgorTime.PoolableScrollView
+namespace IgorTime.PoolableScrollView.ItemView
 {
     [RequireComponent(typeof(ScrollRect))]
     public abstract class ItemViewProvider : MonoBehaviour

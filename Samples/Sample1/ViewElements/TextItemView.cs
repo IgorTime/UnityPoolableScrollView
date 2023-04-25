@@ -1,9 +1,9 @@
-﻿using IgorTime.PoolableScrollView;
-using IgorTime.Samples.Sample_1.ElementData;
+﻿using IgorTime.PoolableScrollView.ItemView;
+using IgorTime.Samples.Sample1.ElementData;
 using TMPro;
 using UnityEngine;
 
-namespace IgorTime.Samples.Sample_1.ViewElements
+namespace IgorTime.Samples.Sample1.ViewElements
 {
     public class TextItemView : ItemViewTyped<TextData>
     {

@@ -1,7 +1,7 @@
-﻿using IgorTime.PoolableScrollView;
+﻿using IgorTime.PoolableScrollView.DataItems;
 using UnityEngine;
 
-namespace IgorTime.Samples.Sample_1.ElementData
+namespace IgorTime.Samples.Sample1.ElementData
 {
     public class SpriteData : IItemData
     {

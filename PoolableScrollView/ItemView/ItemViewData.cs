@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace IgorTime.PoolableScrollView
+namespace IgorTime.PoolableScrollView.ItemView
 {
     public readonly struct ItemViewData
     {

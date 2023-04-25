@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using IgorTime.PoolableScrollView.Scrolls;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace IgorTime.PoolableScrollView
+namespace IgorTime.PoolableScrollView.Features
 {
     [RequireComponent(typeof(ScrollRect))]
     [RequireComponent(typeof(BasePoolableScrollView))]
@@ -16,7 +17,7 @@ namespace IgorTime.PoolableScrollView
 
         [Header("Settings:")]
         [SerializeField]
-        private float speedThreshold = 0.1f;
+        private float speedThreshold = 100f;
 
         [SerializeField]
         private float snappingDuration = 0.05f;

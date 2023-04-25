@@ -1,10 +1,11 @@
 using System.Collections.Generic;
-using IgorTime.PoolableScrollView;
-using IgorTime.Samples.Sample_1.ElementData;
+using IgorTime.PoolableScrollView.DataItems;
+using IgorTime.PoolableScrollView.Scrolls;
+using IgorTime.Samples.Sample1.ElementData;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace IgorTime.Samples.Sample_1
+namespace IgorTime.Samples
 {
     public class ScrollInitializer : MonoBehaviour
     {

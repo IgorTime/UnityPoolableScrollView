@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using IgorTime.PoolableScrollView.DataItems;
+using IgorTime.PoolableScrollView.ItemView;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-namespace IgorTime.PoolableScrollView
+namespace IgorTime.PoolableScrollView.Scrolls
 {
     [RequireComponent(typeof(ScrollRect))]
     [RequireComponent(typeof(ItemViewProvider))]
@@ -18,7 +20,7 @@ namespace IgorTime.PoolableScrollView
         [SerializeField]
         protected ItemViewProvider itemViewProvider;
 
-        protected readonly Dictionary<int, ItemView> ActiveElements = new();
+        protected readonly Dictionary<int, ItemView.ItemView> ActiveElements = new();
 
         protected ItemViewData[] ViewsData;
         protected Rect ContentRect;
@@ -36,7 +38,7 @@ namespace IgorTime.PoolableScrollView
 
         public bool IsAnimated => scrollCoroutine != null;
         
-        private ItemView Head
+        private ItemView.ItemView Head
         {
             get
             {
@@ -51,7 +53,7 @@ namespace IgorTime.PoolableScrollView
             }
         }
 
-        private ItemView Trail
+        private ItemView.ItemView Trail
         {
             get
             {
@@ -217,7 +219,7 @@ namespace IgorTime.PoolableScrollView
         private bool IsScrolledToTheEnd() => HeadIndex == itemsData.Length - 1;
         private bool IsScrolledToTheStart() => TrailIndex == 0;
 
-        private ItemView CreateElement(IItemData data, Vector2 position, int index)
+        private ItemView.ItemView CreateElement(IItemData data, Vector2 position, int index)
         {
             var elementView = itemViewProvider.Provide(data);
             elementView.Initialize(data, index);
@@ -438,7 +440,7 @@ namespace IgorTime.PoolableScrollView
             }
         }
 
-        private void ReleaseElement(ItemView item)
+        private void ReleaseElement(ItemView.ItemView item)
         {
             itemViewProvider.Release(item);
             activeItemsCount--;

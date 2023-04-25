@@ -1,6 +1,7 @@
 ﻿using System;
+using IgorTime.PoolableScrollView.DataItems;
 
-namespace IgorTime.PoolableScrollView
+namespace IgorTime.PoolableScrollView.ItemView
 {
     public abstract class ItemViewTyped<T> : ItemView, IItemViewDataTypeConstrain
         where T : IItemData
