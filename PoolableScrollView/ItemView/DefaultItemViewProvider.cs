@@ -19,7 +19,7 @@ namespace IgorTime.PoolableScrollView.ItemView
         }
 
         [SerializeField]
-        private TypeNameToView[] typeToPrefabMap;
+        private TypeNameToView[] typeToPrefabMap = Array.Empty<TypeNameToView>();
 
         private Dictionary<string, ItemView> internalMap;
 

@@ -10,9 +10,6 @@ namespace IgorTime.PoolableScrollView.Scrolls
     [AddComponentMenu(MenuConstants.ADD_COMPONENT_MENU_PATH + nameof(HorizontalScrollView))]
     public class HorizontalScrollView : BasePoolableScrollView
     {
-        protected override Vector2 GetAnchoredPositionOfContentForItem(int itemIndex) =>
-            new(-ViewsData[itemIndex].Position.x + ViewportWidth * 0.5f, 0);
-
         public override int FindClosestItemToCenter()
         {
             var index = -1;
@@ -30,6 +27,9 @@ namespace IgorTime.PoolableScrollView.Scrolls
 
             return index;
         }
+
+        protected override Vector2 GetAnchoredPositionOfContentForItem(int itemIndex) =>
+            new(-ViewsData[itemIndex].Position.x + ViewportWidth * 0.5f, 0);
 
         protected override bool IsMovingForward(in Vector2 contentDeltaPosition) => contentDeltaPosition.x < 0;
 
@@ -54,47 +54,26 @@ namespace IgorTime.PoolableScrollView.Scrolls
         }
 
         protected override bool IsOutOfViewportInForwardDirection(int itemIndex, in Vector2 contentAnchoredPosition) =>
-            ViewsData[itemIndex].Min.x > -contentAnchoredPosition.x + ViewportWidth; // IsOnTheRightOfViewport
+            ScrollUtils.IsOnTheRightOfViewport(ViewsData[itemIndex], contentAnchoredPosition.x, ViewportWidth);
 
         protected override bool IsOutOfViewportInBackwardDirection(int itemIndex, in Vector2 contentAnchoredPosition) =>
-            ViewsData[itemIndex].Max.x < -contentAnchoredPosition.x; // IsOnTheLeftOfViewport
+            ScrollUtils.IsOnTheLeftOfViewport(ViewsData[itemIndex], contentAnchoredPosition.x);
 
         protected override Vector2 CalculateItemPositionInContent(in int itemIndex) =>
             new(-ContentRect.width * 0.5f + ViewsData[itemIndex].Position.x, 0);
 
         protected override bool IsPartiallyVisibleInViewport(in int itemIndex, in Vector2 contentAnchoredPosition) =>
-            !IsOutOfViewportInBackwardDirection(itemIndex, contentAnchoredPosition) &&
-            !IsOutOfViewportInForwardDirection(itemIndex, contentAnchoredPosition);
+            ScrollUtils.IsPartiallyVisibleInViewportHorizontal(
+                ViewsData[itemIndex],
+                contentAnchoredPosition.x,
+                ViewportWidth);
 
-        protected override int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition)
-        {
-            var startIndex = 0;
-            var endIndex = ViewsData.Length - 1;
-            while (true)
-            {
-                if (startIndex == endIndex || endIndex < 0)
-                {
-                    return -1;
-                }
+        protected override int FindFirstItemVisibleInViewport(in Vector2 contentAnchoredPosition) =>
+            ScrollUtils.BinarySearchOfFirstItemVisibleInViewportHorizontal(
+                ViewsData,
+                contentAnchoredPosition.x,
+                ViewportWidth);
 
-                var middleIndex = startIndex + (endIndex - startIndex) / 2;
-                if (IsPartiallyVisibleInViewport(middleIndex, contentAnchoredPosition))
-                {
-                    return middleIndex;
-                }
-
-                var middleElement = ViewsData[middleIndex];
-                if (middleElement.Position.x > -contentAnchoredPosition.x)
-                {
-                    endIndex = middleIndex - 1;
-                }
-                else
-                {
-                    startIndex = middleIndex + 1;
-                }
-            }
-        }
-        
         protected override void UpdateItemsRelativePosition()
         {
             var viewportPositionX = scrollRect.viewport.position.x;
