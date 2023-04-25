@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace IgorTime.Samples.Sample_1.ViewElements
 {
-    public class ImageElementView : ElementView
+    public class ImageItemView : ItemView
     {
         [SerializeField]
         private Image image;

@@ -2,23 +2,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace IgorTime.PoolableScrollView
 {
     [RequireComponent(typeof(ScrollRect))]
-    [RequireComponent(typeof(ViewItemProvider))]
+    [RequireComponent(typeof(ItemViewProvider))]
     public abstract class BasePoolableScrollView : MonoBehaviour
     {
         [SerializeField]
         protected ScrollRect scrollRect;
 
+        [FormerlySerializedAs("itemViewProvider")]
         [SerializeField]
-        protected ViewItemProvider itemViewProvider;
+        protected ItemViewProvider itemViewProvider;
 
-        protected readonly Dictionary<int, ElementView> ActiveElements = new();
+        protected readonly Dictionary<int, ItemView> ActiveElements = new();
 
-        protected ElementViewData[] ViewsData;
+        protected ItemViewData[] ViewsData;
         protected Rect ContentRect;
         protected RectTransform Content;
         protected float ViewportHeight;
@@ -34,7 +36,7 @@ namespace IgorTime.PoolableScrollView
 
         public bool IsAnimated => scrollCoroutine != null;
         
-        private ElementView Head
+        private ItemView Head
         {
             get
             {
@@ -49,7 +51,7 @@ namespace IgorTime.PoolableScrollView
             }
         }
 
-        private ElementView Trail
+        private ItemView Trail
         {
             get
             {
@@ -215,7 +217,7 @@ namespace IgorTime.PoolableScrollView
         private bool IsScrolledToTheEnd() => HeadIndex == itemsData.Length - 1;
         private bool IsScrolledToTheStart() => TrailIndex == 0;
 
-        private ElementView CreateElement(IItemData data, Vector2 position, int index)
+        private ItemView CreateElement(IItemData data, Vector2 position, int index)
         {
             var elementView = itemViewProvider.Provide(data);
             elementView.Initialize(data, index);
@@ -432,13 +434,13 @@ namespace IgorTime.PoolableScrollView
 
             if (!itemViewProvider)
             {
-                itemViewProvider = GetComponent<ViewItemProvider>();
+                itemViewProvider = GetComponent<ItemViewProvider>();
             }
         }
 
-        private void ReleaseElement(ElementView element)
+        private void ReleaseElement(ItemView item)
         {
-            itemViewProvider.Release(element);
+            itemViewProvider.Release(item);
             activeItemsCount--;
         }
 

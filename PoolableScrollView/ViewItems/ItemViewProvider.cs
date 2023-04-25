@@ -6,32 +6,32 @@ using UnityEngine.UI;
 namespace IgorTime.PoolableScrollView
 {
     [RequireComponent(typeof(ScrollRect))]
-    public abstract class ViewItemProvider : MonoBehaviour
+    public abstract class ItemViewProvider : MonoBehaviour
     {
         [SerializeField]
         private ScrollRect scrollRect;
 
         private readonly Dictionary<Type, ScrollElementsPool> elementPools = new();
 
-        public ElementView Provide(IItemData dataItem)
+        public ItemView Provide(IItemData dataItem)
         {
             var pool = GetElementPool(dataItem);
             return pool.Get();
         }
 
-        public void Release(ElementView element)
+        public void Release(ItemView item)
         {
-            var pool = GetElementPool(element.Data);
-            pool.Release(element);
+            var pool = GetElementPool(item.Data);
+            pool.Release(item);
         }
 
-        public ElementView Peek(IItemData data)
+        public ItemView Peek(IItemData data)
         {
             var pool = GetElementPool(data);
             return pool.Peek();
         }
 
-        protected abstract ElementView GetPrefab(IItemData dataItem);
+        protected abstract ItemView GetPrefab(IItemData dataItem);
 
         private void OnValidate()
         {

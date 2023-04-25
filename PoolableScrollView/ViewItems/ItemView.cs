@@ -3,7 +3,7 @@ using UnityEngine.Events;
 
 namespace IgorTime.PoolableScrollView
 {
-    public abstract class ElementView : MonoBehaviour
+    public abstract class ItemView : MonoBehaviour
     {
         [SerializeField]
         private int index;

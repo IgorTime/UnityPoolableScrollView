@@ -5,8 +5,8 @@ using UnityEngine;
 
 namespace IgorTime.PoolableScrollView
 {
-    [AddComponentMenu(MenuConstants.ADD_COMPONENT_MENU_PATH + nameof(DefaultViewItemProvider))]
-    public class DefaultViewItemProvider : ViewItemProvider, ISerializationCallbackReceiver
+    [AddComponentMenu(MenuConstants.ADD_COMPONENT_MENU_PATH + nameof(DefaultItemViewProvider))]
+    public class DefaultItemViewProvider : ItemViewProvider, ISerializationCallbackReceiver
     {
         [Serializable]
         public class TypeNameToView
@@ -14,13 +14,13 @@ namespace IgorTime.PoolableScrollView
             [TypeDropdown(typeof(IItemData))]
             public string typeName;
             
-            public ElementView item;
+            public ItemView item;
         }
 
         [SerializeField]
         private TypeNameToView[] typeToPrefabMap;
 
-        private Dictionary<string, ElementView> internalMap;
+        private Dictionary<string, ItemView> internalMap;
 
         private static bool IsValid(TypeNameToView typeNameToView)
         {
@@ -43,7 +43,7 @@ namespace IgorTime.PoolableScrollView
 
         public void OnAfterDeserialize()
         {
-            internalMap = new Dictionary<string, ElementView>();
+            internalMap = new Dictionary<string, ItemView>();
             foreach (var typeNameToView in typeToPrefabMap)
             {
                 if (!IsValid(typeNameToView))
@@ -55,7 +55,7 @@ namespace IgorTime.PoolableScrollView
             }
         }
 
-        protected override ElementView GetPrefab(IItemData dataItem)
+        protected override ItemView GetPrefab(IItemData dataItem)
         {
             var typeName = dataItem.GetType().Name;
             return internalMap[typeName];

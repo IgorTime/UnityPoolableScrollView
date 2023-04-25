@@ -36,14 +36,14 @@ namespace IgorTime.PoolableScrollView
 
         protected override void InitViewsData(IItemData[] dataElements, out Vector2 contentSize)
         {
-            ViewsData = new ElementViewData [dataElements.Length];
+            ViewsData = new ItemViewData [dataElements.Length];
 
             var contentWidth = 0f;
             for (var i = 0; i < dataElements.Length; i++)
             {
                 var elementSize = GetElementSize(dataElements[i]);
                 var elementPosition = new Vector2(contentWidth + elementSize.x * 0.5f, 0);
-                ViewsData[i] = new ElementViewData(elementPosition, elementSize);
+                ViewsData[i] = new ItemViewData(elementPosition, elementSize);
 
                 contentWidth += elementSize.x;
             }

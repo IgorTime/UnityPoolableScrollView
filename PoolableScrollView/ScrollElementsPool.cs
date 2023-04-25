@@ -6,13 +6,13 @@ namespace IgorTime.PoolableScrollView
     public class ScrollElementsPool
     {
         private readonly Transform parent;
-        private readonly IObjectPool<ElementView> internalPool;
-        private readonly ElementView prefab;
+        private readonly IObjectPool<ItemView> internalPool;
+        private readonly ItemView prefab;
 
-        public ScrollElementsPool(ElementView prefab, Transform parent)
+        public ScrollElementsPool(ItemView prefab, Transform parent)
         {
             this.parent = parent;
-            internalPool = new ObjectPool<ElementView>(
+            internalPool = new ObjectPool<ItemView>(
                 CreateElement,
                 GetElement,
                 ReleaseElement,
@@ -21,25 +21,25 @@ namespace IgorTime.PoolableScrollView
             this.prefab = prefab;
         }
 
-        private static void ReleaseElement(ElementView elementView)
+        private static void ReleaseElement(ItemView itemView)
         {
-            elementView.SetVisibility(false);
+            itemView.SetVisibility(false);
         }
 
-        private static void GetElement(ElementView elementView)
+        private static void GetElement(ItemView itemView)
         {
-            elementView.SetVisibility(true);
+            itemView.SetVisibility(true);
         }
 
-        public ElementView Get() => internalPool.Get();
+        public ItemView Get() => internalPool.Get();
 
-        public ElementView Peek() => prefab;
+        public ItemView Peek() => prefab;
 
-        public void Release(ElementView element)
+        public void Release(ItemView item)
         {
-            internalPool.Release(element);
+            internalPool.Release(item);
         }
 
-        private ElementView CreateElement() => Object.Instantiate(prefab, parent);
+        private ItemView CreateElement() => Object.Instantiate(prefab, parent);
     }
 }

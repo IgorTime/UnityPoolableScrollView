@@ -2,20 +2,20 @@
 
 namespace IgorTime.PoolableScrollView
 {
-    [RequireComponent(typeof(ElementView))]
-    public abstract class ViewItemAnimation : MonoBehaviour
+    [RequireComponent(typeof(ItemView))]
+    public abstract class ItemViewAnimation : MonoBehaviour
     {
         [SerializeField]
-        private ElementView elementView;
+        private ItemView itemView;
 
         private void OnEnable()
         {
-            elementView.onRelativePositionChanged.AddListener(OnRelativePositionChanged);
+            itemView.onRelativePositionChanged.AddListener(OnRelativePositionChanged);
         }
 
         private void OnDisable()
         {
-            elementView.onRelativePositionChanged.RemoveListener(OnRelativePositionChanged);
+            itemView.onRelativePositionChanged.RemoveListener(OnRelativePositionChanged);
         }
 
         protected abstract void Animate(float normalizedValue);
@@ -27,9 +27,9 @@ namespace IgorTime.PoolableScrollView
 
         private void OnValidate()
         {
-            if (!elementView)
+            if (!itemView)
             {
-                elementView = GetComponent<ElementView>();
+                itemView = GetComponent<ItemView>();
             }
         }
     }

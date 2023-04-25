@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace IgorTime.Samples.Sample_1.ViewElements
 {
-    public class ScaleAnimation : ViewItemAnimation
+    public class ScaleAnimation : ItemViewAnimation
     {
         [SerializeField]
         private Vector2 minScale = Vector2.zero;

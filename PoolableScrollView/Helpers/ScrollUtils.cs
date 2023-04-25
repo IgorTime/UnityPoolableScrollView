@@ -3,25 +3,25 @@
     public static class ScrollUtils
     {
         public static bool IsBelowOfViewport(
-            in ElementViewData viewData,
+            in ItemViewData viewData,
             in float contentAnchoredPositionY,
             in float viewportHeight) =>
             viewData.Min.y > contentAnchoredPositionY + viewportHeight;
 
         public static bool IsAboveOfViewport(
-            in ElementViewData viewData,
+            in ItemViewData viewData,
             in float contentAnchoredPositionY) =>
             viewData.Max.y < contentAnchoredPositionY;
 
         public static bool IsPartiallyVisibleInViewportVertical(
-            in ElementViewData elementView,
+            in ItemViewData itemView,
             in float contentAnchoredPositionY,
             in float viewportHeight) =>
-            !IsBelowOfViewport(elementView, contentAnchoredPositionY, viewportHeight) &&
-            !IsAboveOfViewport(elementView, contentAnchoredPositionY);
+            !IsBelowOfViewport(itemView, contentAnchoredPositionY, viewportHeight) &&
+            !IsAboveOfViewport(itemView, contentAnchoredPositionY);
 
         public static int BinarySearchOfFirstItemVisibleInViewportVertical(
-            ElementViewData[] viewsData,
+            ItemViewData[] viewsData,
             in float contentAnchoredPositionY,
             in float viewportHeight)
         {

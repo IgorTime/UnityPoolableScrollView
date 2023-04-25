@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace IgorTime.Samples.Sample_1.ViewElements
 {
-    public class TextElementView : ElementView
+    public class TextItemView : ItemView
     {
         [SerializeField]
         private TextMeshProUGUI text;
